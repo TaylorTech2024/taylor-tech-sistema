@@ -63,7 +63,6 @@ const CATEGORIA_LABEL = {
   bateria: 'Bateria',
   tela_lcd: 'Tela LCD',
   tela_oled: 'Tela OLED',
-  tampa_traseira: 'Tampa Traseira',
   outro: 'Outro'
 };
 

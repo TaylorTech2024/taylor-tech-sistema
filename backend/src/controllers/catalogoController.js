@@ -5,7 +5,6 @@ const LABEL_CATEGORIA = {
   bateria: 'Troca de Bateria',
   tela_lcd: 'Troca de Tela (LCD)',
   tela_oled: 'Troca de Tela (OLED)',
-  tampa_traseira: 'Troca de Tampa Traseira',
   outro: 'Reparo'
 };
 

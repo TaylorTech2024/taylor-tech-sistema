@@ -41,16 +41,19 @@ em tempo real por `preco_custo (estoque) + margem da categoria`:
 | Bateria                     | + R$ 120,00   |
 | Tela LCD / Incell / Vivid    | + R$ 150,00   |
 | Tela OLED / Soft OLED / Premium | + R$ 200,00 |
-| Tampa Traseira (iPhone)      | + R$ 300,00   |
 
 Essa regra está centralizada em `backend/src/data/margens.js`. Alterar os
 valores ali reflete automaticamente em toda a vitrine e no painel.
 
 O catálogo (`backend/database/seed.sql`) já vem populado com custos reais
-de peças de Apple, Samsung, Motorola e Xiaomi, extraídos das tabelas de
-fornecedor fornecidas (telas, baterias e tampas). Ajuste os custos e o
-estoque diretamente na tela **Estoque** do painel administrativo, ou
-editando o `seed.sql`.
+de telas e baterias de Apple, Samsung, Motorola e Xiaomi, extraídos das
+tabelas de fornecedor fornecidas. Ajuste os custos e o estoque diretamente
+na tela **Estoque** do painel administrativo, ou editando o `seed.sql`.
+
+> O sistema trabalha apenas com **Tela** e **Bateria**. Se você já tinha
+> rodado uma versão anterior do `seed.sql` (com tampas traseiras), rode
+> `backend/database/purge_tampas.sql` uma vez para remover essas peças
+> do estoque.
 
 ## Regra de negócio: fechamento de OS
 

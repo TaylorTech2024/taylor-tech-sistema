@@ -4,7 +4,6 @@ const MARGENS = {
   bateria: 120,
   tela_lcd: 150,
   tela_oled: 200,
-  tampa_traseira: 300,
   outro: 100
 };
 

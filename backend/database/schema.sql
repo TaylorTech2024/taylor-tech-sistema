@@ -22,16 +22,16 @@ CREATE TABLE IF NOT EXISTS clientes (
 
 -- ---------------------------------------------------------------------
 -- Tabela: estoque
--- Cada linha representa uma peca (tela, bateria, tampa, etc.) para um
--- modelo especifico de aparelho. O preco final cobrado do cliente é
--- sempre "preco_custo + margem da categoria" (ver src/data/margens.js).
+-- Cada linha representa uma peca (tela ou bateria) para um modelo
+-- especifico de aparelho. O preco final cobrado do cliente é sempre
+-- "preco_custo + margem da categoria" (ver src/data/margens.js).
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS estoque (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_peca VARCHAR(150) NOT NULL,
   marca VARCHAR(40) NOT NULL,
   modelo VARCHAR(80) NOT NULL,
-  categoria ENUM('bateria', 'tela_lcd', 'tela_oled', 'tampa_traseira', 'outro') NOT NULL,
+  categoria ENUM('bateria', 'tela_lcd', 'tela_oled', 'outro') NOT NULL,
   preco_custo DECIMAL(10,2) NOT NULL,
   quantidade INT NOT NULL DEFAULT 0,
   estoque_minimo INT NOT NULL DEFAULT 3,
