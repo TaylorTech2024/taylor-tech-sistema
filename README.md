@@ -130,6 +130,55 @@ No Chrome/Edge, abra `http://localhost:3000/index.html` e clique no ícone
 de instalação na barra de endereço (ou "Adicionar à tela inicial" no
 celular).
 
+## Deploy gratuito online (Render + TiDB Cloud)
+
+Combinação 100% gratuita, sem cartão de crédito, para colocar o sistema
+no ar com uma URL pública.
+
+> Já tentamos o **db4free.net** antes, mas esse serviço costuma ficar
+> instável/fora do ar. O **TiDB Cloud Serverless** é compatível com
+> MySQL, gratuito para sempre e bem mais confiável — inclusive tem um
+> editor SQL no navegador, então nem precisa instalar `mysql` na sua
+> máquina para rodar os scripts.
+
+### 1. Banco de dados gratuito (TiDB Cloud Serverless)
+
+1. Acesse **https://tidbcloud.com/** e crie uma conta (GitHub, Google ou e-mail — sem cartão).
+2. Crie um cluster **Serverless** (plano gratuito, criação em ~1 minuto).
+3. Abra o cluster → aba **SQL Editor** (direto no navegador) → cole o
+   conteúdo de `backend/database/schema.sql` e execute, depois faça o
+   mesmo com `backend/database/seed.sql`.
+4. Vá em **Connect** → escolha "General" → anote: `Host`, `Port` (geralmente `4000`,
+   não `3306`), `User` (algo como `xxxxx.root`) e defina uma senha.
+
+### 2. Hospedar o site (Render, plano Free)
+
+1. Crie uma conta em **https://render.com** (pode entrar com GitHub).
+2. **New +** → **Blueprint** → conecte o repositório
+   `TaylorTech2024/taylor-tech-sistema`. O Render detecta o `render.yaml`
+   do projeto e já configura tudo (pasta `backend/`, build e start).
+3. Preencha as variáveis de ambiente pedidas com os dados do TiDB Cloud:
+
+   | Variável | Valor |
+   |---|---|
+   | `DB_HOST` | host do TiDB Cloud |
+   | `DB_PORT` | `4000` |
+   | `DB_USER` | usuário do TiDB Cloud |
+   | `DB_PASSWORD` | senha que você definiu |
+   | `DB_NAME` | `test` (ou o nome do banco que você criou) |
+   | `DB_SSL` | `true` |
+   | `WHATSAPP_NUMERO` | número da loja, só números (ex: `5581999999999`) |
+
+4. Clique em **Apply/Create**. Em poucos minutos o Render gera uma URL
+   pública, ex: `https://taylor-tech.onrender.com`.
+5. Acesse `https://taylor-tech.onrender.com/index.html` (vitrine) e
+   `.../admin.html` (painel) — já no ar.
+
+**Limitações do plano grátis (normais):** o Render "dorme" o site após
+15 min sem acesso (o primeiro acesso depois demora ~30-50s para
+"acordar"); o TiDB Cloud Serverless free tem limite de 5GB, de sobra
+para o catálogo e histórico de uma assistência técnica.
+
 ## Scripts disponíveis (backend)
 
 - `npm run dev` — inicia com `nodemon` (reinicia automaticamente ao salvar)
