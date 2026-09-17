@@ -95,3 +95,20 @@ CREATE TABLE IF NOT EXISTS financeiro (
   CONSTRAINT fk_financeiro_os FOREIGN KEY (os_id) REFERENCES ordens_servico(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: usuarios
+-- Equipe com login e permissoes por modulo. cargo = 'Dono' sempre tem
+-- acesso total, independente do array em permissoes.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  senha_hash VARCHAR(255) NOT NULL,
+  cargo VARCHAR(60) NOT NULL DEFAULT 'Tecnico',
+  permissoes JSON NOT NULL,
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_usuarios_email (email)
+) ENGINE=InnoDB;

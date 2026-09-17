@@ -21,3 +21,5 @@ services:
         value: "true"
       - key: WHATSAPP_NUMERO
         sync: false
+      - key: JWT_SECRET
+        generateValue: true

@@ -1,13 +1,24 @@
 const API_BASE = '/api';
 
 async function apiRequest(path, options = {}) {
+  const token = localStorage.getItem('tt_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options
   });
 
   let body = null;
   try { body = await res.json(); } catch (_) { /* resposta sem corpo */ }
+
+  if (res.status === 401 && path !== '/auth/login') {
+    localStorage.removeItem('tt_token');
+    localStorage.removeItem('tt_usuario');
+    window.location.href = '/login.html';
+    return new Promise(() => {});
+  }
 
   if (!res.ok) {
     const mensagem = (body && body.erro) || 'Erro inesperado ao comunicar com o servidor.';
@@ -59,6 +70,18 @@ const api = {
   clientes: {
     listar: () => apiRequest('/clientes'),
     buscar: (id) => apiRequest(`/clientes/${id}`)
+  },
+
+  auth: {
+    login: (email, senha) => apiRequest('/auth/login', { method: 'POST', body: JSON.stringify({ email, senha }) }),
+    me: () => apiRequest('/auth/me')
+  },
+
+  usuarios: {
+    listar: () => apiRequest('/usuarios'),
+    criar: (dados) => apiRequest('/usuarios', { method: 'POST', body: JSON.stringify(dados) }),
+    atualizar: (id, dados) => apiRequest(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
+    remover: (id) => apiRequest(`/usuarios/${id}`, { method: 'DELETE' })
   }
 };
 

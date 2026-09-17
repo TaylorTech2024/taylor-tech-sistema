@@ -65,6 +65,26 @@ o backend executa em uma única transação MySQL:
 Se qualquer etapa falhar (ex.: peça sem estoque), toda a transação é
 revertida (`ROLLBACK`) e nada é alterado.
 
+## Login e Equipe (permissões por funcionário)
+
+O painel administrativo exige login (`/login.html`). Cada pessoa da
+equipe tem um `cargo` e uma lista de módulos liberados:
+
+- **Dono**: acesso total, sempre — ignora a lista de permissões.
+- Qualquer outro cargo (Gerente, Tecnico, Atendente, ou outro nome
+  livre): só vê e só acessa (mesmo via API) os módulos marcados na
+  tela **Equipe** (`ordens`, `financeiro`, `estoque`, `clientes`, `equipe`).
+
+Login inicial (criado pelo `seed_usuarios.sql`):
+
+```
+E-mail: admin@taylortech.com
+Senha:  TaylorTech@123
+```
+
+Troque essa senha (ou crie seu próprio usuário Dono e desative o
+padrão) na tela **Equipe** assim que o sistema estiver no ar.
+
 ## Pré-requisitos
 
 - [Node.js](https://nodejs.org) 18 ou superior
@@ -85,7 +105,12 @@ da pasta `backend/database`:
 ```bash
 mysql -u root -p < schema.sql
 mysql -u root -p taylor_tech < seed.sql
+mysql -u root -p taylor_tech < seed_usuarios.sql
 ```
+
+O `seed_usuarios.sql` cria o usuário administrador padrão do painel
+(login inicial abaixo). Troque a senha na tela **Equipe** assim que
+possível.
 
 ### 3. Configure as variáveis de ambiente
 
@@ -104,6 +129,7 @@ DB_USER=root
 DB_PASSWORD=sua_senha
 DB_NAME=taylor_tech
 WHATSAPP_NUMERO=5581999999999
+JWT_SECRET=qualquer-texto-aleatorio-aqui
 ```
 
 ### 4. Instale as dependências e rode o servidor

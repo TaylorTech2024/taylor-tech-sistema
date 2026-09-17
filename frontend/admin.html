@@ -26,22 +26,26 @@
     </div>
 
     <nav>
-      <div class="nav-item active" data-view="ordens"><i class="fa-solid fa-list-check"></i> Ordens de Serviço</div>
-      <div class="nav-item" data-view="checklist"><i class="fa-solid fa-clipboard-list"></i> Checklist de Entrada</div>
-      <div class="nav-item" data-view="financeiro"><i class="fa-solid fa-sack-dollar"></i> Financeiro</div>
-      <div class="nav-item" data-view="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</div>
-      <div class="nav-item" data-view="clientes"><i class="fa-solid fa-users"></i> Clientes</div>
+      <div class="nav-item" data-view="ordens" data-modulo="ordens"><i class="fa-solid fa-list-check"></i> Ordens de Serviço</div>
+      <div class="nav-item" data-view="checklist" data-modulo="ordens"><i class="fa-solid fa-clipboard-list"></i> Checklist de Entrada</div>
+      <div class="nav-item" data-view="financeiro" data-modulo="financeiro"><i class="fa-solid fa-sack-dollar"></i> Financeiro</div>
+      <div class="nav-item" data-view="estoque" data-modulo="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</div>
+      <div class="nav-item" data-view="clientes" data-modulo="clientes"><i class="fa-solid fa-users"></i> Clientes</div>
+      <div class="nav-item" data-view="equipe" data-modulo="equipe"><i class="fa-solid fa-user-shield"></i> Equipe</div>
     </nav>
 
     <div class="sidebar-footer">
-      Painel Administrativo<br>Taylor Tech &copy; <span id="anoAtualAdmin"></span>
+      <div id="usuarioLogadoNome" style="font-weight:700; color:var(--text); margin-bottom:0.15rem;"></div>
+      <div id="usuarioLogadoCargo" style="margin-bottom:0.7rem;"></div>
+      <button class="btn btn-ghost btn-sm btn-block" id="btnSair"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</button>
+      <div style="margin-top:0.8rem;">Taylor Tech &copy; <span id="anoAtualAdmin"></span></div>
     </div>
   </aside>
 
   <main class="admin-main">
 
     <!-- ===================== ORDENS DE SERVICO ===================== -->
-    <section class="view active" id="view-ordens">
+    <section class="view" id="view-ordens">
       <div class="admin-header">
         <div>
           <h1>Ordens de Serviço</h1>
@@ -175,6 +179,26 @@
             <tr><th>Cliente</th><th>WhatsApp</th><th>Aparelhos Reparados</th><th>Total Gasto</th><th>Cliente desde</th></tr>
           </thead>
           <tbody id="clientesTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== EQUIPE ===================== -->
+    <section class="view" id="view-equipe">
+      <div class="admin-header">
+        <div>
+          <h1>Equipe</h1>
+          <p>Contas de acesso e permissões por módulo.</p>
+        </div>
+        <button class="btn btn-primary" id="btnNovaPessoa"><i class="fa-solid fa-plus"></i> Nova Pessoa</button>
+      </div>
+
+      <div class="card table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Cargo</th><th>Permissões</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="equipeTbody"></tbody>
         </table>
       </div>
     </section>

@@ -1,4 +1,29 @@
+/* =====================================================================
+   AUTENTICACAO E PERMISSOES
+===================================================================== */
+if (!localStorage.getItem('tt_token')) {
+  window.location.href = '/login.html';
+}
+
+const usuarioAtual = JSON.parse(localStorage.getItem('tt_usuario') || 'null') || { cargo: '', permissoes: [] };
+
+function temPermissao(modulo) {
+  return usuarioAtual.cargo === 'Dono' || usuarioAtual.permissoes.includes(modulo);
+}
+
 document.getElementById('anoAtualAdmin').textContent = new Date().getFullYear();
+document.getElementById('usuarioLogadoNome').textContent = usuarioAtual.nome || '';
+document.getElementById('usuarioLogadoCargo').textContent = usuarioAtual.cargo || '';
+
+document.querySelectorAll('.nav-item').forEach((item) => {
+  if (!temPermissao(item.dataset.modulo)) item.style.display = 'none';
+});
+
+document.getElementById('btnSair').addEventListener('click', () => {
+  localStorage.removeItem('tt_token');
+  localStorage.removeItem('tt_usuario');
+  window.location.href = '/login.html';
+});
 
 function swalClasses() {
   return {
@@ -31,7 +56,8 @@ const CARREGADORES_VIEW = {
   checklist: carregarSelectChecklistOs,
   financeiro: carregarFinanceiro,
   estoque: carregarEstoque,
-  clientes: carregarClientes
+  clientes: carregarClientes,
+  equipe: carregarEquipe
 };
 
 document.querySelectorAll('.nav-item').forEach((item) => {
@@ -619,6 +645,182 @@ document.getElementById('filtroClientes').addEventListener('input', (e) => {
 });
 
 /* =====================================================================
+   EQUIPE
+===================================================================== */
+const MODULOS_PERMISSAO = [
+  { valor: 'ordens', label: 'Ordens de Serviço e Checklist' },
+  { valor: 'financeiro', label: 'Financeiro' },
+  { valor: 'estoque', label: 'Estoque' },
+  { valor: 'clientes', label: 'Clientes' },
+  { valor: 'equipe', label: 'Equipe (gestão de acessos)' }
+];
+
+let equipeCache = [];
+
+async function carregarEquipe() {
+  const tbody = document.getElementById('equipeTbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><span class="spinner"></span></td></tr>';
+
+  try {
+    equipeCache = await api.usuarios.listar();
+    renderEquipe();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+function renderEquipe() {
+  const tbody = document.getElementById('equipeTbody');
+  if (equipeCache.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma pessoa cadastrada.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = equipeCache.map((u) => {
+    const permissoes = Array.isArray(u.permissoes) ? u.permissoes : JSON.parse(u.permissoes || '[]');
+    const permissoesLabel = u.cargo === 'Dono'
+      ? 'Acesso total'
+      : (permissoes.map((p) => MODULOS_PERMISSAO.find((m) => m.valor === p)?.label || p).join(', ') || '—');
+    const badge = u.ativo ? '<span class="badge badge-ok">Ativo</span>' : '<span class="badge badge-muted">Inativo</span>';
+
+    return `
+      <tr>
+        <td>${u.nome}</td>
+        <td>${u.email}</td>
+        <td>${u.cargo}</td>
+        <td style="max-width:320px;">${permissoesLabel}</td>
+        <td>${badge}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" data-acao="editar-pessoa" data-id="${u.id}"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger btn-sm" data-acao="remover-pessoa" data-id="${u.id}"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('[data-acao="editar-pessoa"]').forEach((btn) =>
+    btn.addEventListener('click', () => abrirModalPessoa(Number(btn.dataset.id))));
+  tbody.querySelectorAll('[data-acao="remover-pessoa"]').forEach((btn) =>
+    btn.addEventListener('click', () => removerPessoa(Number(btn.dataset.id))));
+}
+
+function formularioPessoaHtml(pessoa = {}) {
+  const permissoesAtuais = Array.isArray(pessoa.permissoes) ? pessoa.permissoes : JSON.parse(pessoa.permissoes || '[]');
+  const cargos = ['Dono', 'Gerente', 'Tecnico', 'Atendente'];
+
+  return `
+    <div style="text-align:left; display:grid; gap:0.7rem;">
+      <input id="pessoaNome" class="swal2-input" style="margin:0;width:100%;" placeholder="Nome completo" value="${pessoa.nome || ''}">
+      <input id="pessoaEmail" type="email" class="swal2-input" style="margin:0;width:100%;" placeholder="E-mail de acesso" value="${pessoa.email || ''}">
+      <input id="pessoaSenha" type="password" class="swal2-input" style="margin:0;width:100%;" placeholder="${pessoa.id ? 'Nova senha (deixe em branco para manter)' : 'Senha'}">
+      <select id="pessoaCargo" class="swal2-input" style="margin:0;width:100%;">
+        ${cargos.map((c) => `<option value="${c}" ${pessoa.cargo === c ? 'selected' : ''}>${c}</option>`).join('')}
+      </select>
+      <div style="text-align:left; font-size:0.82rem; color:var(--text-dim); margin-top:0.4rem;">Módulos liberados (ignorado se o cargo for "Dono"):</div>
+      <div id="pessoaPermissoes" style="text-align:left; display:grid; gap:0.4rem;">
+        ${MODULOS_PERMISSAO.map((m) => `
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;">
+            <input type="checkbox" value="${m.valor}" ${permissoesAtuais.includes(m.valor) ? 'checked' : ''}> ${m.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function lerFormularioPessoa(exigirSenha) {
+  const nome = document.getElementById('pessoaNome').value.trim();
+  const email = document.getElementById('pessoaEmail').value.trim();
+  const senha = document.getElementById('pessoaSenha').value;
+  const cargo = document.getElementById('pessoaCargo').value;
+  const permissoes = Array.from(document.querySelectorAll('#pessoaPermissoes input:checked')).map((c) => c.value);
+
+  if (!nome || !email || (exigirSenha && !senha)) {
+    Swal.showValidationMessage('Preencha nome, e-mail e senha.');
+    return false;
+  }
+
+  const dados = { nome, email, cargo, permissoes };
+  if (senha) dados.senha = senha;
+  return dados;
+}
+
+document.getElementById('btnNovaPessoa').addEventListener('click', async () => {
+  const { value: dados } = await Swal.fire({
+    title: 'Nova Pessoa',
+    customClass: swalClasses(),
+    width: 480,
+    html: formularioPessoaHtml(),
+    showCancelButton: true,
+    confirmButtonText: 'Cadastrar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => lerFormularioPessoa(true)
+  });
+  if (!dados) return;
+
+  try {
+    await api.usuarios.criar(dados);
+    Swal.fire({ icon: 'success', title: 'Pessoa cadastrada!', customClass: swalClasses(), timer: 1400, showConfirmButton: false });
+    carregarEquipe();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+});
+
+async function abrirModalPessoa(id) {
+  const pessoa = equipeCache.find((u) => u.id === id);
+  if (!pessoa) return;
+
+  const { value: dados } = await Swal.fire({
+    title: `Editar ${pessoa.nome}`,
+    customClass: swalClasses(),
+    width: 480,
+    html: formularioPessoaHtml(pessoa),
+    showCancelButton: true,
+    confirmButtonText: 'Salvar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => lerFormularioPessoa(false)
+  });
+  if (!dados) return;
+
+  try {
+    await api.usuarios.atualizar(id, dados);
+    Swal.fire({ icon: 'success', title: 'Dados atualizados!', customClass: swalClasses(), timer: 1400, showConfirmButton: false });
+    carregarEquipe();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+}
+
+async function removerPessoa(id) {
+  const confirmado = await Swal.fire({
+    icon: 'warning',
+    title: 'Desativar acesso?',
+    text: 'Essa pessoa nao vai conseguir mais entrar no painel.',
+    showCancelButton: true,
+    confirmButtonText: 'Desativar',
+    cancelButtonText: 'Cancelar',
+    customClass: swalClasses()
+  });
+  if (!confirmado.isConfirmed) return;
+
+  try {
+    await api.usuarios.remover(id);
+    carregarEquipe();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+}
+
+/* =====================================================================
    INICIALIZACAO
 ===================================================================== */
-carregarOrdens();
+const primeiroNavVisivel = Array.from(document.querySelectorAll('.nav-item'))
+  .find((item) => item.style.display !== 'none');
+
+if (primeiroNavVisivel) {
+  primeiroNavVisivel.classList.add('active');
+  document.getElementById(`view-${primeiroNavVisivel.dataset.view}`).classList.add('active');
+  const carregar = CARREGADORES_VIEW[primeiroNavVisivel.dataset.view];
+  if (carregar) carregar();
+}
