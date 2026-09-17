@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taylor Tech | Assistência Técnica de Celulares e Computadores</title>
+<meta name="description" content="Orçamento rápido e preço fechado para troca de tela, bateria e mais. Taylor Tech - assistência técnica de celulares e computadores.">
+<meta name="theme-color" content="#090b10">
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icons/icon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/client.css">
+</head>
+<body class="page">
+
+<header class="topbar">
+  <div class="brand">
+    <img src="/assets/icons/icon.svg" alt="Taylor Tech">
+    <span>TAYLOR <span class="tech">TECH</span></span>
+  </div>
+  <div class="topbar-info">
+    <a href="#orcamento"><i class="fa-solid fa-file-invoice-dollar"></i> Orçamento Online</a>
+    <a href="#como-funciona"><i class="fa-solid fa-circle-info"></i> Como Funciona</a>
+    <a id="linkWhatsTopo" href="#" target="_blank"><i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="hero-tag"><i class="fa-solid fa-bolt"></i> ORÇAMENTO EM SEGUNDOS</div>
+    <h1>Conserto rápido, <span class="highlight">preço justo</span> e sem letra miúda.</h1>
+    <p class="lead">Diga o que aconteceu com o seu aparelho e veja na hora o valor final do reparo — sem surpresa, sem taxa escondida. Apple, Samsung, Motorola e Xiaomi.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary magnetic" onclick="document.getElementById('orcamento').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Fazer meu orçamento
+      </button>
+      <a id="linkWhatsHero" class="btn btn-ghost magnetic" href="#" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>+4</b><span>marcas atendidas</span></div>
+      <div class="stat"><b>100%</b><span>preço fechado</span></div>
+      <div class="stat"><b>garantia</b><span>em todo reparo</span></div>
+    </div>
+  </div>
+
+  <form id="formOrcamento" class="form-card" novalidate>
+    <h2><i class="fa-solid fa-screwdriver-wrench"></i> Solicitar Orçamento</h2>
+    <p class="subtitle">Preencha os dados abaixo. É rápido!</p>
+
+    <div class="field">
+      <label for="nome">Seu nome</label>
+      <input type="text" id="nome" name="nome" placeholder="Ex: Maria Silva" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label for="whatsapp">WhatsApp</label>
+      <input type="tel" id="whatsapp" name="whatsapp" placeholder="(81) 9 9999-9999" autocomplete="tel" required>
+    </div>
+
+    <div class="field">
+      <label for="marca">Marca do aparelho</label>
+      <select id="marca" name="marca" required>
+        <option value="">Selecione a marca...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="modelo">Modelo</label>
+      <select id="modelo" name="modelo" disabled required>
+        <option value="">Selecione a marca primeiro...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="servico">Serviço desejado</label>
+      <select id="servico" name="servico" disabled required>
+        <option value="">Selecione o modelo primeiro...</option>
+      </select>
+    </div>
+
+    <div class="price-box">
+      <span class="label">Valor final do serviço</span>
+      <span class="value placeholder" id="valorServico">selecione o serviço</span>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block magnetic" id="btnEnviar">
+      <i class="fa-brands fa-whatsapp"></i> Solicitar e enviar no WhatsApp
+    </button>
+  </form>
+</section>
+
+<section class="section" id="como-funciona">
+  <div class="section-title">
+    <h2>Como funciona</h2>
+    <p>Do orçamento à entrega, em 4 passos simples.</p>
+  </div>
+  <div class="steps">
+    <div class="card step-card">
+      <div class="icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <h3>1. Escolha o aparelho</h3>
+      <p>Marca, modelo e o serviço que você precisa.</p>
+    </div>
+    <div class="card step-card">
+      <div class="icon"><i class="fa-solid fa-tags"></i></div>
+      <h3>2. Veja o preço fechado</h3>
+      <p>Sem divisão de peça e mão de obra. Só o valor final.</p>
+    </div>
+    <div class="card step-card">
+      <div class="icon"><i class="fa-brands fa-whatsapp"></i></div>
+      <h3>3. Confirme no WhatsApp</h3>
+      <p>Seu pedido é registrado e direcionado direto pra nossa equipe.</p>
+    </div>
+    <div class="card step-card">
+      <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3>4. Retire com garantia</h3>
+      <p>Checklist de entrada e saída, com garantia no serviço.</p>
+    </div>
+  </div>
+</section>
+
+<div class="brands-strip">
+  <span><i class="fa-brands fa-apple"></i> Apple</span>
+  <span>Samsung</span>
+  <span>Motorola</span>
+  <span>Xiaomi</span>
+</div>
+
+<footer class="footer">
+  <p>&copy; <span id="anoAtual"></span> Taylor Tech - Assistência Técnica de Celulares e Computadores.</p>
+</footer>
+
+<a id="whatsFab" class="whats-fab" href="#" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/client.js"></script>
+</body>
+</html>

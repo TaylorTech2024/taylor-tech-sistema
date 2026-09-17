@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taylor Tech | Painel Administrativo</title>
+<meta name="theme-color" content="#090b10">
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/assets/icons/icon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/assets/icons/icon.svg" alt="Taylor Tech">
+      <span>TAYLOR <span class="tech">TECH</span></span>
+    </div>
+
+    <nav>
+      <div class="nav-item active" data-view="ordens"><i class="fa-solid fa-list-check"></i> Ordens de Serviço</div>
+      <div class="nav-item" data-view="checklist"><i class="fa-solid fa-clipboard-list"></i> Checklist de Entrada</div>
+      <div class="nav-item" data-view="financeiro"><i class="fa-solid fa-sack-dollar"></i> Financeiro</div>
+      <div class="nav-item" data-view="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</div>
+      <div class="nav-item" data-view="clientes"><i class="fa-solid fa-users"></i> Clientes</div>
+    </nav>
+
+    <div class="sidebar-footer">
+      Painel Administrativo<br>Taylor Tech &copy; <span id="anoAtualAdmin"></span>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ===================== ORDENS DE SERVICO ===================== -->
+    <section class="view active" id="view-ordens">
+      <div class="admin-header">
+        <div>
+          <h1>Ordens de Serviço</h1>
+          <p>Fila de atendimentos pendentes e em andamento.</p>
+        </div>
+        <button class="btn btn-primary" id="btnNovaOs"><i class="fa-solid fa-plus"></i> Nova OS Manual</button>
+      </div>
+
+      <div class="toolbar">
+        <select id="filtroStatus">
+          <option value="pendente">Pendentes</option>
+          <option value="em_andamento">Em andamento</option>
+          <option value="concluido">Concluídas</option>
+          <option value="cancelado">Canceladas</option>
+          <option value="">Todas</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="btnAtualizarOs"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+      </div>
+
+      <div class="os-grid" id="osGrid"></div>
+    </section>
+
+    <!-- ===================== CHECKLIST ===================== -->
+    <section class="view" id="view-checklist">
+      <div class="admin-header">
+        <div>
+          <h1>Checklist de Entrada</h1>
+          <p>Vistoria técnica formal do aparelho antes do reparo.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1.3rem 1.5rem; margin-bottom:1.4rem;">
+        <div class="field" style="margin-bottom:0;">
+          <label for="checklistOsSelect">Selecione a Ordem de Serviço</label>
+          <select id="checklistOsSelect">
+            <option value="">Carregando ordens...</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="checklistContainer"></div>
+    </section>
+
+    <!-- ===================== FINANCEIRO ===================== -->
+    <section class="view" id="view-financeiro">
+      <div class="admin-header">
+        <div>
+          <h1>Financeiro</h1>
+          <p>Visão geral do faturamento, custo e lucro líquido.</p>
+        </div>
+        <button class="btn btn-ghost" id="btnAtualizarFinanceiro"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="card kpi-card">
+          <div class="kpi-label">Faturamento</div>
+          <div class="kpi-value" id="kpiFaturamento">R$ 0,00</div>
+        </div>
+        <div class="card kpi-card danger">
+          <div class="kpi-label">Custo de Peças</div>
+          <div class="kpi-value" id="kpiCusto">R$ 0,00</div>
+        </div>
+        <div class="card kpi-card neon">
+          <div class="kpi-label">Lucro Líquido</div>
+          <div class="kpi-value" id="kpiLucro">R$ 0,00</div>
+        </div>
+        <div class="card kpi-card">
+          <div class="kpi-label">Margem</div>
+          <div class="kpi-value" id="kpiMargem">0%</div>
+        </div>
+      </div>
+
+      <div class="card table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th><th>OS</th><th>Cliente</th><th>Descrição</th>
+              <th>Valor Cobrado</th><th>Custo Peça</th><th>Lucro</th>
+            </tr>
+          </thead>
+          <tbody id="financeiroTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ESTOQUE ===================== -->
+    <section class="view" id="view-estoque">
+      <div class="admin-header">
+        <div>
+          <h1>Estoque de Peças</h1>
+          <p>Controle de peças por modelo, com baixa automática ao concluir OS.</p>
+        </div>
+        <button class="btn btn-primary" id="btnNovaPeca"><i class="fa-solid fa-plus"></i> Nova Peça</button>
+      </div>
+
+      <div id="estoqueAlertaBox"></div>
+
+      <div class="toolbar">
+        <input type="text" id="filtroEstoque" placeholder="Buscar por marca, modelo ou peça...">
+      </div>
+
+      <div class="card table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Peça</th><th>Marca</th><th>Modelo</th><th>Categoria</th>
+              <th>Custo</th><th>Preço Final</th><th>Qtd.</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="estoqueTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== CLIENTES ===================== -->
+    <section class="view" id="view-clientes">
+      <div class="admin-header">
+        <div>
+          <h1>Clientes</h1>
+          <p>Base de clientes, valor gasto e aparelhos reparados.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="filtroClientes" placeholder="Buscar por nome ou WhatsApp...">
+      </div>
+
+      <div class="card table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Cliente</th><th>WhatsApp</th><th>Aparelhos Reparados</th><th>Total Gasto</th><th>Cliente desde</th></tr>
+          </thead>
+          <tbody id="clientesTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/admin.js"></script>
+</body>
+</html>

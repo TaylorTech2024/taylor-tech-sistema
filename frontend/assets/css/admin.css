@@ -1,0 +1,310 @@
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  background: #0c0e15;
+  border-right: 1px solid var(--border);
+  padding: 1.6rem 1.1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0 0.5rem 1.6rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.2rem;
+}
+
+.sidebar .brand img {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 0 8px var(--neon-glow));
+}
+
+.sidebar .brand span.tech { color: var(--neon); }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.3rem;
+  transition: background 0.15s ease, color 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-item i { width: 20px; text-align: center; }
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: rgba(57, 255, 20, 0.1);
+  border-color: rgba(57, 255, 20, 0.3);
+  color: var(--neon);
+  box-shadow: 0 0 16px rgba(57,255,20,0.08) inset;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* ---------- Main content ---------- */
+.admin-main {
+  padding: 1.8rem 2.2rem 3rem;
+  max-width: 1400px;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.6rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.admin-header p {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  margin-top: 0.2rem;
+}
+
+.view { display: none; animation: fadein 0.25s ease; }
+.view.active { display: block; }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Grid de KPIs ---------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.1rem;
+  margin-bottom: 1.8rem;
+}
+
+.kpi-card {
+  padding: 1.3rem 1.4rem;
+}
+
+.kpi-card .kpi-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kpi-card .kpi-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin-top: 0.4rem;
+}
+
+.kpi-card.neon .kpi-value { color: var(--neon); text-shadow: 0 0 16px var(--neon-glow); }
+.kpi-card.danger .kpi-value { color: var(--danger); }
+
+/* ---------- Tabelas ---------- */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+table.data-table th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border);
+}
+
+table.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+table.data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ---------- Filas de OS (cards) ---------- */
+.os-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.os-card {
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.os-card .os-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.os-card h3 {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.os-card .os-meta {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.os-card .os-valor {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--neon);
+}
+
+.os-card .os-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+/* ---------- Checklist ---------- */
+.checklist-panel {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.checklist-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+}
+
+.checklist-row .item-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.status-toggle {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.status-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-dim);
+  transition: all 0.15s ease;
+}
+
+.status-btn[data-value="ok"].active {
+  background: rgba(57,255,20,0.15); color: var(--neon); border-color: var(--neon);
+}
+.status-btn[data-value="atencao"].active {
+  background: rgba(255,176,32,0.15); color: var(--warning); border-color: var(--warning);
+}
+.status-btn[data-value="nao_testado"].active {
+  background: rgba(255,255,255,0.08); color: var(--text); border-color: var(--text-dim);
+}
+
+/* ---------- Estoque ---------- */
+.stock-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  color: var(--danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: 1.4rem;
+}
+
+/* ---------- Filtros / toolbar ---------- */
+.toolbar {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.3rem;
+  flex-wrap: wrap;
+}
+
+.toolbar select, .toolbar input {
+  padding: 0.6rem 0.9rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.85rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-dim);
+}
+
+.empty-state i { font-size: 2rem; margin-bottom: 0.8rem; display: block; color: var(--text-dim); }
+
+@media (max-width: 1000px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; flex-direction: row; overflow-x: auto; }
+  .sidebar .brand { display: none; }
+  .sidebar-footer { display: none; }
+  .nav-item { white-space: nowrap; }
+  .kpi-grid { grid-template-columns: 1fr; }
+}

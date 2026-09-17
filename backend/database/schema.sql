@@ -1,0 +1,97 @@
+-- =====================================================================
+-- Taylor Tech - Sistema de Gestao para Assistencia Tecnica
+-- Script de criacao do banco de dados (MySQL 8+)
+-- =====================================================================
+
+CREATE DATABASE IF NOT EXISTS taylor_tech
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE taylor_tech;
+
+-- ---------------------------------------------------------------------
+-- Tabela: clientes
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS clientes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  whatsapp VARCHAR(20) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_clientes_whatsapp (whatsapp)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: estoque
+-- Cada linha representa uma peca (tela, bateria, tampa, etc.) para um
+-- modelo especifico de aparelho. O preco final cobrado do cliente é
+-- sempre "preco_custo + margem da categoria" (ver src/data/margens.js).
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS estoque (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome_peca VARCHAR(150) NOT NULL,
+  marca VARCHAR(40) NOT NULL,
+  modelo VARCHAR(80) NOT NULL,
+  categoria ENUM('bateria', 'tela_lcd', 'tela_oled', 'tampa_traseira', 'outro') NOT NULL,
+  preco_custo DECIMAL(10,2) NOT NULL,
+  quantidade INT NOT NULL DEFAULT 0,
+  estoque_minimo INT NOT NULL DEFAULT 3,
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_estoque_marca_modelo (marca, modelo)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: ordens_servico
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ordens_servico (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  aparelho_marca VARCHAR(40) NOT NULL,
+  aparelho_modelo VARCHAR(80) NOT NULL,
+  peca_id INT NULL,
+  servico_descricao VARCHAR(150) NOT NULL,
+  valor_cobrado DECIMAL(10,2) NOT NULL,
+  status ENUM('pendente', 'em_andamento', 'concluido', 'cancelado') NOT NULL DEFAULT 'pendente',
+  origem ENUM('site', 'manual') NOT NULL DEFAULT 'site',
+  observacoes TEXT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  concluido_em TIMESTAMP NULL,
+  CONSTRAINT fk_os_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_os_peca FOREIGN KEY (peca_id) REFERENCES estoque(id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  KEY idx_os_status (status)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: os_checklist
+-- Checklist de entrada do aparelho (vistoria tecnica formal).
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS os_checklist (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  os_id INT NOT NULL,
+  item VARCHAR(60) NOT NULL,
+  status ENUM('ok', 'atencao', 'nao_testado') NOT NULL DEFAULT 'nao_testado',
+  observacao VARCHAR(255) NULL,
+  CONSTRAINT fk_checklist_os FOREIGN KEY (os_id) REFERENCES ordens_servico(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE KEY uq_checklist_os_item (os_id, item)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: financeiro
+-- Uma linha é criada automaticamente (dentro de uma transacao) sempre
+-- que uma OS é concluida, registrando faturamento, custo e lucro real.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS financeiro (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  os_id INT NOT NULL,
+  descricao VARCHAR(150) NOT NULL,
+  valor_entrada DECIMAL(10,2) NOT NULL,
+  custo_peca DECIMAL(10,2) NOT NULL DEFAULT 0,
+  lucro DECIMAL(10,2) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_financeiro_os FOREIGN KEY (os_id) REFERENCES ordens_servico(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
