@@ -25,6 +25,25 @@ document.getElementById('btnSair').addEventListener('click', () => {
   window.location.href = '/login.html';
 });
 
+/* =====================================================================
+   MENU GAVETA (MOBILE)
+===================================================================== */
+const sidebarEl = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+function abrirMenu() {
+  sidebarEl.classList.add('open');
+  sidebarOverlay.classList.add('open');
+}
+function fecharMenu() {
+  sidebarEl.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+}
+
+document.getElementById('btnHamburger').addEventListener('click', abrirMenu);
+sidebarOverlay.addEventListener('click', fecharMenu);
+document.querySelectorAll('.nav-item').forEach((item) => item.addEventListener('click', fecharMenu));
+
 function swalClasses() {
   return {
     popup: 'taylor-swal',
