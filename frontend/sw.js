@@ -41,3 +41,32 @@ self.addEventListener('fetch', (event) => {
     caches.match(request).then((cached) => cached || fetch(request))
   );
 });
+
+// Notificacoes push (nova OS entrando, etc).
+self.addEventListener('push', (event) => {
+  let dados = {};
+  try { dados = event.data ? event.data.json() : {}; } catch (_) { /* payload nao era JSON */ }
+
+  event.waitUntil(
+    self.registration.showNotification(dados.title || 'Taylor Tech', {
+      body: dados.body || '',
+      icon: '/assets/icons/logo.png',
+      badge: '/assets/icons/logo.png',
+      data: { url: dados.url || '/admin.html' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/admin.html';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(url) && 'focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+    })
+  );
+});

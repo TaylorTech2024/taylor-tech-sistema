@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { precoFinal, obterConfiguracoes } = require('../data/margens');
+const { notificarEquipe } = require('../utils/push');
 
 // Cria (ou reaproveita) o cliente pelo whatsapp e abre uma OS pendente
 // vinda da vitrine publica (index.html).
@@ -52,6 +53,12 @@ exports.criarPedido = async (req, res) => {
     );
 
     await conn.commit();
+
+    notificarEquipe({
+      title: 'Nova Ordem de Serviço!',
+      body: `${nome} - ${marca} ${modelo} - ${peca.nome_peca}`,
+      url: '/admin.html'
+    }).catch(() => {});
 
     res.status(201).json({
       os_id: osResult.insertId,

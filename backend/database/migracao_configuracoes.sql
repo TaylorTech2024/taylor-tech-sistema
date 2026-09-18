@@ -26,3 +26,15 @@ ALTER TABLE estoque ADD COLUMN IF NOT EXISTS qualidade VARCHAR(40) NULL;
 ALTER TABLE ordens_servico ADD COLUMN IF NOT EXISTS motivo_cancelamento VARCHAR(255) NULL;
 
 ALTER TABLE estoque ADD COLUMN IF NOT EXISTS preco_venda_manual DECIMAL(10,2) NULL;
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  endpoint TEXT NOT NULL,
+  endpoint_hash CHAR(64) NOT NULL,
+  p256dh VARCHAR(255) NOT NULL,
+  auth VARCHAR(255) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_push_endpoint_hash (endpoint_hash),
+  CONSTRAINT fk_push_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

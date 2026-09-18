@@ -98,6 +98,12 @@ const api = {
   configuracoes: {
     obter: () => apiRequest('/configuracoes'),
     atualizar: (dados) => apiRequest('/configuracoes', { method: 'PUT', body: JSON.stringify(dados) })
+  },
+
+  push: {
+    chavePublica: () => apiRequest('/push/chave-publica'),
+    inscrever: (subscription) => apiRequest('/push/inscrever', { method: 'POST', body: JSON.stringify(subscription) }),
+    desinscrever: (endpoint) => apiRequest('/push/desinscrever', { method: 'POST', body: JSON.stringify({ endpoint }) })
   }
 };
 

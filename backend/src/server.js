@@ -13,6 +13,7 @@ const clientesRoutes = require('./routes/clientes.routes');
 const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const configuracoesRoutes = require('./routes/configuracoes.routes');
+const pushRoutes = require('./routes/push.routes');
 const { autenticar, autorizar } = require('./middleware/auth');
 
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api/financeiro', autenticar, autorizar('financeiro'), financeiroRoutes
 app.use('/api/clientes', autenticar, autorizar('clientes'), clientesRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/configuracoes', configuracoesRoutes);
+app.use('/api/push', autenticar, pushRoutes);
 
 // Serve o front-end (PWA) direto pelo mesmo servidor/porta.
 app.use(express.static(FRONTEND_DIR));

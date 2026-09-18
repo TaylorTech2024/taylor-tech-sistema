@@ -25,6 +25,12 @@ document.getElementById('btnSair').addEventListener('click', () => {
   window.location.href = '/login.html';
 });
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => console.error('SW falhou:', err));
+  });
+}
+
 /* =====================================================================
    MENU GAVETA (MOBILE)
 ===================================================================== */
@@ -1073,6 +1079,7 @@ async function carregarConfiguracoes() {
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'Erro ao carregar configurações', text: err.message, customClass: swalClasses() });
   }
+  atualizarStatusNotificacoes().catch((err) => console.error('Erro ao checar notificações:', err));
 }
 
 document.getElementById('formConfiguracoes').addEventListener('submit', async (e) => {
@@ -1088,6 +1095,90 @@ document.getElementById('formConfiguracoes').addEventListener('submit', async (e
   try {
     await api.configuracoes.atualizar(dados);
     Swal.fire({ icon: 'success', title: 'Configurações salvas!', text: 'Os novos valores já valem para a vitrine e o painel.', customClass: swalClasses(), timer: 1800, showConfirmButton: false });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+});
+
+/* =====================================================================
+   NOTIFICACOES PUSH
+===================================================================== */
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+async function atualizarStatusNotificacoes() {
+  const statusEl = document.getElementById('notificacoesStatus');
+  const btnAtivar = document.getElementById('btnAtivarNotificacoes');
+  const btnDesativar = document.getElementById('btnDesativarNotificacoes');
+
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    statusEl.innerHTML = '<span style="color:var(--danger);">Este navegador não suporta notificações push.</span>';
+    btnAtivar.style.display = 'none';
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.getSubscription();
+
+  if (subscription) {
+    statusEl.innerHTML = '<span style="color:var(--neon);"><i class="fa-solid fa-circle-check"></i> Notificações ativas neste dispositivo.</span>';
+    btnAtivar.style.display = 'none';
+    btnDesativar.style.display = 'inline-flex';
+  } else {
+    statusEl.innerHTML = '<span style="color:var(--text-dim);">Notificações desativadas neste dispositivo.</span>';
+    btnAtivar.style.display = 'inline-flex';
+    btnDesativar.style.display = 'none';
+  }
+}
+
+document.getElementById('btnAtivarNotificacoes').addEventListener('click', async () => {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    Swal.fire({ icon: 'error', title: 'Não suportado', text: 'Este navegador não suporta notificações push.', customClass: swalClasses() });
+    return;
+  }
+
+  try {
+    const permissao = await Notification.requestPermission();
+    if (permissao !== 'granted') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Permissão não concedida',
+        text: 'Ative as notificações para este site nas configurações do navegador/iPhone e tente de novo.',
+        customClass: swalClasses()
+      });
+      return;
+    }
+
+    const { publicKey } = await api.push.chavePublica();
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+
+    await api.push.inscrever(subscription.toJSON());
+    await atualizarStatusNotificacoes();
+    Swal.fire({ icon: 'success', title: 'Notificações ativadas!', customClass: swalClasses(), timer: 1800, showConfirmButton: false });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro ao ativar notificações', text: err.message, customClass: swalClasses() });
+  }
+});
+
+document.getElementById('btnDesativarNotificacoes').addEventListener('click', async () => {
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (subscription) {
+      await api.push.desinscrever(subscription.endpoint);
+      await subscription.unsubscribe();
+    }
+    await atualizarStatusNotificacoes();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
   }

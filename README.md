@@ -135,6 +135,18 @@ WHATSAPP_NUMERO=5581999999999
 JWT_SECRET=qualquer-texto-aleatorio-aqui
 ```
 
+Para receber notificações push (ver seção **Notificações push no celular**
+abaixo), gere um par de chaves VAPID e adicione no mesmo `.env`:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+```
+VAPID_PUBLIC_KEY=cole-a-chave-publica-aqui
+VAPID_PRIVATE_KEY=cole-a-chave-privada-aqui
+```
+
 ### 4. Instale as dependências e rode o servidor
 
 ```bash
@@ -197,6 +209,8 @@ no ar com uma URL pública.
    | `DB_NAME` | `test` (ou o nome do banco que você criou) |
    | `DB_SSL` | `true` |
    | `WHATSAPP_NUMERO` | número da loja, só números (ex: `5581999999999`) |
+   | `VAPID_PUBLIC_KEY` | gerada com `npx web-push generate-vapid-keys` |
+   | `VAPID_PRIVATE_KEY` | gerada com `npx web-push generate-vapid-keys` |
 
 4. Clique em **Apply/Create**. Em poucos minutos o Render gera uma URL
    pública, ex: `https://taylor-tech.onrender.com`.
@@ -207,6 +221,24 @@ no ar com uma URL pública.
 15 min sem acesso (o primeiro acesso depois demora ~30-50s para
 "acordar"); o TiDB Cloud Serverless free tem limite de 5GB, de sobra
 para o catálogo e histórico de uma assistência técnica.
+
+## Notificações push no celular
+
+Quando um cliente pede um serviço pela vitrine, o painel pode avisar a
+equipe direto no celular, mesmo com o app em segundo plano.
+
+1. Rode `npx web-push generate-vapid-keys` uma única vez e cadastre
+   `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` no `.env` (local) ou nas
+   variáveis de ambiente do Render (produção). Sem essas chaves, o botão
+   de ativar fica desativado.
+2. **No iPhone:** abra o site no Safari, toque em **Compartilhar** →
+   **Adicionar à Tela de Início**, e a partir daí sempre abra o painel
+   por esse ícone (exige iOS 16.4 ou mais recente).
+3. No painel, vá em **Configurações → Notificações no celular** e
+   toque em **Ativar notificações neste dispositivo**. Aceite a
+   permissão quando o iPhone perguntar.
+4. Repita esse passo em cada celular/computador que deve receber os
+   avisos — cada dispositivo tem sua própria inscrição.
 
 ## Scripts disponíveis (backend)
 
@@ -228,3 +260,5 @@ para o catálogo e histórico de uma assistência técnica.
 | GET/POST/PUT/DELETE | `/api/estoque` | CRUD de peças |
 | GET | `/api/financeiro/resumo` | Faturamento, custo, lucro e margem |
 | GET | `/api/clientes` | Base de clientes com total gasto |
+| GET | `/api/push/chave-publica` | Chave pública VAPID p/ inscrição de notificações |
+| POST | `/api/push/inscrever` | Registra o dispositivo p/ receber notificações push |
