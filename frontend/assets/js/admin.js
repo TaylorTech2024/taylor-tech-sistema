@@ -425,32 +425,208 @@ async function carregarFinanceiro() {
     const [resumo, lancamentos] = await Promise.all([api.financeiro.resumo(), api.financeiro.listar()]);
 
     document.getElementById('kpiFaturamento').textContent = formatarMoeda(resumo.faturamento);
-    document.getElementById('kpiCusto').textContent = formatarMoeda(resumo.custo_total);
+    document.getElementById('kpiDespesas').textContent = formatarMoeda(resumo.despesas_total);
     document.getElementById('kpiLucro').textContent = formatarMoeda(resumo.lucro_liquido);
-    document.getElementById('kpiMargem').textContent = `${resumo.margem_percentual}%`;
+    document.getElementById('kpiMargem').textContent = `(${resumo.margem_percentual}%)`;
+    document.getElementById('kpiAReceber').textContent = formatarMoeda(resumo.a_receber_total);
 
     const tbody = document.getElementById('financeiroTbody');
-    if (lancamentos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum lançamento ainda.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = lancamentos.map((l) => `
-      <tr>
-        <td>${formatarData(l.criado_em)}</td>
-        <td>#${l.os_id}</td>
-        <td>${l.cliente_nome}</td>
-        <td>${l.aparelho_marca} ${l.aparelho_modelo} - ${l.descricao}</td>
-        <td>${formatarMoeda(l.valor_entrada)}</td>
-        <td>${formatarMoeda(l.custo_peca)}</td>
-        <td class="text-neon">${formatarMoeda(l.lucro)}</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = lancamentos.length === 0
+      ? '<tr><td colspan="7" class="empty-state">Nenhum lançamento ainda.</td></tr>'
+      : lancamentos.map((l) => `
+        <tr>
+          <td>${formatarData(l.criado_em)}</td>
+          <td>#${l.os_id}</td>
+          <td>${l.cliente_nome}</td>
+          <td>${l.aparelho_marca} ${l.aparelho_modelo} - ${l.descricao}</td>
+          <td>${formatarMoeda(l.valor_entrada)}</td>
+          <td>${formatarMoeda(l.custo_peca)}</td>
+          <td class="text-neon">${formatarMoeda(l.lucro)}</td>
+        </tr>
+      `).join('');
   } catch (err) {
     console.error(err);
   }
+
+  carregarDespesas();
+  carregarContasReceber();
 }
 
 document.getElementById('btnAtualizarFinanceiro').addEventListener('click', carregarFinanceiro);
+
+/* ------------------------- Despesas (Saidas) ------------------------- */
+async function carregarDespesas() {
+  const tbody = document.getElementById('despesasTbody');
+  try {
+    const despesas = await api.financeiro.despesas.listar();
+    tbody.innerHTML = despesas.length === 0
+      ? '<tr><td colspan="4" class="empty-state">Nenhuma despesa registrada.</td></tr>'
+      : despesas.map((d) => `
+        <tr>
+          <td>${new Date(d.data_despesa).toLocaleDateString('pt-BR')}</td>
+          <td>${d.descricao}</td>
+          <td class="text-danger" style="color:var(--danger);">${formatarMoeda(d.valor)}</td>
+          <td><button class="btn btn-danger btn-sm" data-acao="remover-despesa" data-id="${d.id}"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>
+      `).join('');
+
+    tbody.querySelectorAll('[data-acao="remover-despesa"]').forEach((btn) =>
+      btn.addEventListener('click', () => removerDespesa(Number(btn.dataset.id))));
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+document.getElementById('btnNovaDespesa').addEventListener('click', async () => {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const { value: dados } = await Swal.fire({
+    title: 'Nova Despesa',
+    customClass: swalClasses(),
+    width: 420,
+    html: `
+      <div style="text-align:left; display:grid; gap:0.7rem;">
+        <input id="despDescricao" class="swal2-input" style="margin:0;width:100%;" placeholder="Descrição (ex: Aluguel, Conta de luz)">
+        <input id="despValor" type="number" step="0.01" class="swal2-input" style="margin:0;width:100%;" placeholder="Valor (R$)">
+        <input id="despData" type="date" class="swal2-input" style="margin:0;width:100%;" value="${hoje}">
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Registrar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      const descricao = document.getElementById('despDescricao').value.trim();
+      const valor = Number(document.getElementById('despValor').value);
+      const data_despesa = document.getElementById('despData').value;
+      if (!descricao || !valor || !data_despesa) {
+        Swal.showValidationMessage('Preencha todos os campos.');
+        return false;
+      }
+      return { descricao, valor, data_despesa };
+    }
+  });
+  if (!dados) return;
+
+  try {
+    await api.financeiro.despesas.criar(dados);
+    Swal.fire({ icon: 'success', title: 'Despesa registrada!', customClass: swalClasses(), timer: 1400, showConfirmButton: false });
+    carregarFinanceiro();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+});
+
+async function removerDespesa(id) {
+  const confirmado = await Swal.fire({
+    icon: 'warning',
+    title: 'Remover despesa?',
+    showCancelButton: true,
+    confirmButtonText: 'Remover',
+    cancelButtonText: 'Cancelar',
+    customClass: swalClasses()
+  });
+  if (!confirmado.isConfirmed) return;
+
+  try {
+    await api.financeiro.despesas.remover(id);
+    carregarFinanceiro();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+}
+
+/* ------------------------- Contas a Receber ------------------------- */
+async function carregarContasReceber() {
+  const tbody = document.getElementById('contasReceberTbody');
+  try {
+    const contas = await api.financeiro.contasReceber.listar();
+    tbody.innerHTML = contas.length === 0
+      ? '<tr><td colspan="6" class="empty-state">Nenhuma conta a receber.</td></tr>'
+      : contas.map((c) => {
+        const badge = c.status === 'recebido'
+          ? '<span class="badge badge-ok">Recebido</span>'
+          : '<span class="badge badge-warning">Pendente</span>';
+        return `
+          <tr>
+            <td>${c.cliente_nome}</td>
+            <td>${c.descricao}</td>
+            <td>${formatarMoeda(c.valor)}</td>
+            <td>${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}</td>
+            <td>${badge}</td>
+            <td>${c.status === 'pendente'
+              ? `<button class="btn btn-primary btn-sm" data-acao="receber" data-id="${c.id}"><i class="fa-solid fa-check"></i> Recebido</button>`
+              : ''}</td>
+          </tr>
+        `;
+      }).join('');
+
+    tbody.querySelectorAll('[data-acao="receber"]').forEach((btn) =>
+      btn.addEventListener('click', () => marcarRecebido(Number(btn.dataset.id))));
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+document.getElementById('btnNovaContaReceber').addEventListener('click', async () => {
+  let clientes = [];
+  try {
+    clientes = await api.clientes.listar();
+  } catch (err) {
+    return Swal.fire({ icon: 'error', title: 'Erro ao carregar clientes', text: err.message, customClass: swalClasses() });
+  }
+  if (clientes.length === 0) {
+    return Swal.fire({ icon: 'info', title: 'Nenhum cliente cadastrado ainda.', customClass: swalClasses() });
+  }
+
+  const hoje = new Date().toISOString().slice(0, 10);
+  const { value: dados } = await Swal.fire({
+    title: 'Nova Conta a Receber',
+    customClass: swalClasses(),
+    width: 420,
+    html: `
+      <div style="text-align:left; display:grid; gap:0.7rem;">
+        <select id="crCliente" class="swal2-input" style="margin:0;width:100%;">
+          <option value="">Selecione o cliente...</option>
+          ${clientes.map((c) => `<option value="${c.id}">${c.nome} (${c.whatsapp})</option>`).join('')}
+        </select>
+        <input id="crDescricao" class="swal2-input" style="margin:0;width:100%;" placeholder="Descrição (ex: 2ª parcela do reparo)">
+        <input id="crValor" type="number" step="0.01" class="swal2-input" style="margin:0;width:100%;" placeholder="Valor (R$)">
+        <input id="crVencimento" type="date" class="swal2-input" style="margin:0;width:100%;" value="${hoje}">
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Registrar',
+    cancelButtonText: 'Cancelar',
+    preConfirm: () => {
+      const cliente_id = document.getElementById('crCliente').value;
+      const descricao = document.getElementById('crDescricao').value.trim();
+      const valor = Number(document.getElementById('crValor').value);
+      const data_vencimento = document.getElementById('crVencimento').value;
+      if (!cliente_id || !descricao || !valor || !data_vencimento) {
+        Swal.showValidationMessage('Preencha todos os campos.');
+        return false;
+      }
+      return { cliente_id, descricao, valor, data_vencimento };
+    }
+  });
+  if (!dados) return;
+
+  try {
+    await api.financeiro.contasReceber.criar(dados);
+    Swal.fire({ icon: 'success', title: 'Conta registrada!', customClass: swalClasses(), timer: 1400, showConfirmButton: false });
+    carregarFinanceiro();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+});
+
+async function marcarRecebido(id) {
+  try {
+    await api.financeiro.contasReceber.marcarRecebido(id);
+    carregarFinanceiro();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+}
 
 /* =====================================================================
    ESTOQUE

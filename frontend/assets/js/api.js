@@ -64,7 +64,17 @@ const api = {
 
   financeiro: {
     resumo: () => apiRequest('/financeiro/resumo'),
-    listar: () => apiRequest('/financeiro')
+    listar: () => apiRequest('/financeiro'),
+    despesas: {
+      listar: () => apiRequest('/financeiro/despesas'),
+      criar: (dados) => apiRequest('/financeiro/despesas', { method: 'POST', body: JSON.stringify(dados) }),
+      remover: (id) => apiRequest(`/financeiro/despesas/${id}`, { method: 'DELETE' })
+    },
+    contasReceber: {
+      listar: () => apiRequest('/financeiro/contas-receber'),
+      criar: (dados) => apiRequest('/financeiro/contas-receber', { method: 'POST', body: JSON.stringify(dados) }),
+      marcarRecebido: (id) => apiRequest(`/financeiro/contas-receber/${id}/receber`, { method: 'PUT' })
+    }
   },
 
   clientes: {

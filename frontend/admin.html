@@ -112,24 +112,30 @@
 
       <div class="kpi-grid">
         <div class="card kpi-card">
-          <div class="kpi-label">Faturamento</div>
+          <div class="kpi-label">Entradas</div>
           <div class="kpi-value" id="kpiFaturamento">R$ 0,00</div>
         </div>
         <div class="card kpi-card danger">
-          <div class="kpi-label">Custo de Peças</div>
-          <div class="kpi-value" id="kpiCusto">R$ 0,00</div>
+          <div class="kpi-label">Saídas</div>
+          <div class="kpi-value" id="kpiDespesas">R$ 0,00</div>
         </div>
         <div class="card kpi-card neon">
-          <div class="kpi-label">Lucro Líquido</div>
+          <div class="kpi-label">Lucro Líquido <span id="kpiMargem" class="text-dim" style="font-size:0.75rem;"></span></div>
           <div class="kpi-value" id="kpiLucro">R$ 0,00</div>
         </div>
         <div class="card kpi-card">
-          <div class="kpi-label">Margem</div>
-          <div class="kpi-value" id="kpiMargem">0%</div>
+          <div class="kpi-label">A Receber</div>
+          <div class="kpi-value" id="kpiAReceber">R$ 0,00</div>
         </div>
       </div>
 
-      <div class="card table-wrap">
+      <div class="toolbar">
+        <button class="btn btn-ghost btn-sm" id="btnNovaDespesa"><i class="fa-solid fa-minus"></i> Nova Despesa</button>
+        <button class="btn btn-ghost btn-sm" id="btnNovaContaReceber"><i class="fa-solid fa-plus"></i> Nova Conta a Receber</button>
+      </div>
+
+      <h3 style="margin:0.4rem 0 0.8rem; font-size:1rem;">Entradas por OS</h3>
+      <div class="card table-wrap" style="margin-bottom:1.6rem;">
         <table class="data-table">
           <thead>
             <tr>
@@ -138,6 +144,26 @@
             </tr>
           </thead>
           <tbody id="financeiroTbody"></tbody>
+        </table>
+      </div>
+
+      <h3 style="margin:0.4rem 0 0.8rem; font-size:1rem;">Saídas</h3>
+      <div class="card table-wrap" style="margin-bottom:1.6rem;">
+        <table class="data-table">
+          <thead>
+            <tr><th>Data</th><th>Descrição</th><th>Valor</th><th></th></tr>
+          </thead>
+          <tbody id="despesasTbody"></tbody>
+        </table>
+      </div>
+
+      <h3 style="margin:0.4rem 0 0.8rem; font-size:1rem;">Contas a Receber</h3>
+      <div class="card table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="contasReceberTbody"></tbody>
         </table>
       </div>
     </section>

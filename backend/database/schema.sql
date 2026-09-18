@@ -112,3 +112,33 @@ CREATE TABLE IF NOT EXISTS usuarios (
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_usuarios_email (email)
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: financeiro_despesas
+-- Saidas gerais da loja (aluguel, contas, compra de peca em lote, etc.)
+-- nao ligadas a uma OS especifica.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS financeiro_despesas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  descricao VARCHAR(150) NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  data_despesa DATE NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: contas_receber
+-- Valores a receber de clientes (ex: pagamento parcelado/a prazo).
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS contas_receber (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  descricao VARCHAR(150) NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  data_vencimento DATE NOT NULL,
+  status ENUM('pendente', 'recebido') NOT NULL DEFAULT 'pendente',
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  recebido_em TIMESTAMP NULL,
+  CONSTRAINT fk_receber_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
