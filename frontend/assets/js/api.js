@@ -107,6 +107,14 @@ const api = {
   }
 };
 
+// Escapa texto antes de inserir em innerHTML - evita XSS com dados
+// que vieram de fora (ex: nome/aparelho digitados pelo cliente na vitrine).
+function escaparHtml(texto) {
+  return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
 function formatarMoeda(valor) {
   return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const catalogoRoutes = require('./routes/catalogo.routes');
 const pedidosRoutes = require('./routes/pedidos.routes');
@@ -23,6 +24,16 @@ const FRONTEND_DIR = path.join(__dirname, '..', '..', 'frontend');
 // Um erro assincrono nao tratado (ex: banco fora do ar) nao deve derrubar
 // o processo inteiro - so essa requisicao falha.
 process.on('unhandledRejection', (err) => console.error('unhandledRejection:', err));
+
+// Atras do proxy do Render - sem isso, o rate limit veria todo mundo
+// vindo do mesmo IP (o do proxy) e bloquearia geral em vez de por visitante.
+app.set('trust proxy', 1);
+
+// CSP e Cross-Origin-Embedder-Policy ficam desligados porque o site carrega
+// fontes/icones de CDNs externos (Google Fonts, FontAwesome, jsDelivr); os
+// outros cabeçalhos de seguranca do helmet (anti-clickjacking, MIME sniffing
+// etc.) continuam ativos.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 
 app.use(cors());
 app.use(express.json());

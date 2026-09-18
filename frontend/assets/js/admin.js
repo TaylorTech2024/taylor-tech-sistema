@@ -130,15 +130,15 @@ function criarOsCard(os) {
   div.innerHTML = `
     <div class="os-top">
       <div>
-        <h3>#${os.id} - ${os.aparelho_marca} ${os.aparelho_modelo}</h3>
-        <div class="os-meta">${os.cliente_nome} · ${formatarData(os.criado_em)}</div>
+        <h3>#${os.id} - ${escaparHtml(os.aparelho_marca)} ${escaparHtml(os.aparelho_modelo)}</h3>
+        <div class="os-meta">${escaparHtml(os.cliente_nome)} · ${formatarData(os.criado_em)}</div>
       </div>
       <span class="badge ${st.badge}">${st.label}</span>
     </div>
-    <div class="os-meta">${os.servico_descricao}</div>
+    <div class="os-meta">${escaparHtml(os.servico_descricao)}</div>
     <div class="os-valor">${formatarMoeda(os.valor_cobrado)}</div>
     ${os.status === 'cancelado' && os.motivo_cancelamento
-      ? `<div class="os-meta" style="color:var(--danger); font-style:italic;">Motivo: ${os.motivo_cancelamento}</div>`
+      ? `<div class="os-meta" style="color:var(--danger); font-style:italic;">Motivo: ${escaparHtml(os.motivo_cancelamento)}</div>`
       : ''}
     <div class="os-actions">
       <a class="btn btn-ghost btn-sm" href="${whatsLink}" target="_blank"><i class="fa-brands fa-whatsapp"></i> Chamar</a>
@@ -347,8 +347,8 @@ function renderChecklist(osId, os, linhas) {
   const header = `
     <div class="card" style="padding:1.2rem 1.5rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;">
       <div>
-        <h3 style="margin-bottom:0.2rem;">OS #${osId} - ${os.aparelho_marca} ${os.aparelho_modelo}</h3>
-        <span class="text-dim" style="font-size:0.85rem;">Cliente: ${os.cliente_nome} · ${os.servico_descricao}</span>
+        <h3 style="margin-bottom:0.2rem;">OS #${osId} - ${escaparHtml(os.aparelho_marca)} ${escaparHtml(os.aparelho_modelo)}</h3>
+        <span class="text-dim" style="font-size:0.85rem;">Cliente: ${escaparHtml(os.cliente_nome)} · ${escaparHtml(os.servico_descricao)}</span>
       </div>
       <div style="display:flex; gap:0.6rem;">
         <button class="btn btn-ghost btn-sm" id="btnImprimirChecklist"><i class="fa-solid fa-print"></i> Gerar Documento</button>
@@ -361,7 +361,7 @@ function renderChecklist(osId, os, linhas) {
     <div class="card checklist-row" data-item="${l.item}">
       <div>
         <div class="item-name">${l.item}</div>
-        <input type="text" class="obs-input" placeholder="Observação (opcional)" value="${l.observacao || ''}"
+        <input type="text" class="obs-input" placeholder="Observação (opcional)" value="${escaparHtml(l.observacao || '')}"
           style="margin-top:0.4rem; width:100%; background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--text); padding:0.4rem 0.6rem; font-family:var(--font); font-size:0.8rem;">
       </div>
       <div class="status-toggle">
@@ -417,9 +417,9 @@ function imprimirChecklist(os, itens) {
   const statusLabel = { ok: 'OK', atencao: 'Atenção', nao_testado: 'Não Testado' };
   const linhas = itens.map((i) => `
     <tr>
-      <td style="padding:8px;border:1px solid #ccc;">${i.item}</td>
+      <td style="padding:8px;border:1px solid #ccc;">${escaparHtml(i.item)}</td>
       <td style="padding:8px;border:1px solid #ccc;text-align:center;">${statusLabel[i.status]}</td>
-      <td style="padding:8px;border:1px solid #ccc;">${i.observacao || '-'}</td>
+      <td style="padding:8px;border:1px solid #ccc;">${escaparHtml(i.observacao || '-')}</td>
     </tr>
   `).join('');
 
@@ -437,9 +437,9 @@ function imprimirChecklist(os, itens) {
     </style></head><body>
       <h1>TAYLOR <span>TECH</span></h1>
       <p class="meta">Checklist de Entrada - OS #${os.id}<br>
-      Cliente: ${os.cliente_nome} (${os.cliente_whatsapp})<br>
-      Aparelho: ${os.aparelho_marca} ${os.aparelho_modelo}<br>
-      Serviço: ${os.servico_descricao} · Data: ${new Date().toLocaleString('pt-BR')}</p>
+      Cliente: ${escaparHtml(os.cliente_nome)} (${escaparHtml(os.cliente_whatsapp)})<br>
+      Aparelho: ${escaparHtml(os.aparelho_marca)} ${escaparHtml(os.aparelho_modelo)}<br>
+      Serviço: ${escaparHtml(os.servico_descricao)} · Data: ${new Date().toLocaleString('pt-BR')}</p>
       <table>
         <thead><tr><th>Item</th><th>Status</th><th>Observação</th></tr></thead>
         <tbody>${linhas}</tbody>
@@ -474,8 +474,8 @@ async function carregarFinanceiro() {
         <tr>
           <td data-label="Data">${formatarData(l.criado_em)}</td>
           <td data-label="OS">#${l.os_id}</td>
-          <td data-label="Cliente">${l.cliente_nome}</td>
-          <td data-label="Descrição">${l.aparelho_marca} ${l.aparelho_modelo} - ${l.descricao}</td>
+          <td data-label="Cliente">${escaparHtml(l.cliente_nome)}</td>
+          <td data-label="Descrição">${escaparHtml(l.aparelho_marca)} ${escaparHtml(l.aparelho_modelo)} - ${escaparHtml(l.descricao)}</td>
           <td data-label="Valor Cobrado">${formatarMoeda(l.valor_entrada)}</td>
           <td data-label="Custo Peça">${formatarMoeda(l.custo_peca)}</td>
           <td data-label="Lucro" class="text-neon">${formatarMoeda(l.lucro)}</td>
@@ -501,7 +501,7 @@ async function carregarDespesas() {
       : despesas.map((d) => `
         <tr>
           <td data-label="Data">${new Date(d.data_despesa).toLocaleDateString('pt-BR')}</td>
-          <td data-label="Descrição">${d.descricao}</td>
+          <td data-label="Descrição">${escaparHtml(d.descricao)}</td>
           <td data-label="Valor" class="text-danger" style="color:var(--danger);">${formatarMoeda(d.valor)}</td>
           <td class="cell-actions"><button class="btn btn-danger btn-sm" data-acao="remover-despesa" data-id="${d.id}"><i class="fa-solid fa-trash"></i></button></td>
         </tr>
@@ -584,8 +584,8 @@ async function carregarContasReceber() {
           : '<span class="badge badge-warning">Pendente</span>';
         return `
           <tr>
-            <td data-label="Cliente">${c.cliente_nome}</td>
-            <td data-label="Descrição">${c.descricao}</td>
+            <td data-label="Cliente">${escaparHtml(c.cliente_nome)}</td>
+            <td data-label="Descrição">${escaparHtml(c.descricao)}</td>
             <td data-label="Valor">${formatarMoeda(c.valor)}</td>
             <td data-label="Vencimento">${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}</td>
             <td data-label="Status">${badge}</td>
@@ -726,11 +726,11 @@ function renderEstoque(lista) {
 
     return `
       <tr>
-        <td data-label="Peça">${p.nome_peca}</td>
-        <td data-label="Marca">${p.marca}</td>
-        <td data-label="Modelo">${p.modelo}</td>
+        <td data-label="Peça">${escaparHtml(p.nome_peca)}</td>
+        <td data-label="Marca">${escaparHtml(p.marca)}</td>
+        <td data-label="Modelo">${escaparHtml(p.modelo)}</td>
         <td data-label="Categoria">${CATEGORIA_LABEL[p.categoria] || p.categoria}</td>
-        <td data-label="Qualidade">${p.qualidade || '—'}</td>
+        <td data-label="Qualidade">${p.qualidade ? escaparHtml(p.qualidade) : '—'}</td>
         <td data-label="Custo">${formatarMoeda(p.preco_custo)}</td>
         <td data-label="Preço Final" class="text-neon">${formatarMoeda(p.preco_final)}${p.preco_manual ? ' <span class="badge badge-warning" style="margin-left:0.3rem;">Manual</span>' : ''}</td>
         <td data-label="Qtd.">${p.quantidade}</td>
@@ -882,8 +882,8 @@ function renderClientes(lista) {
   }
   tbody.innerHTML = lista.map((c) => `
     <tr>
-      <td data-label="Cliente">${c.nome}</td>
-      <td data-label="WhatsApp">${c.whatsapp}</td>
+      <td data-label="Cliente">${escaparHtml(c.nome)}</td>
+      <td data-label="WhatsApp">${escaparHtml(c.whatsapp)}</td>
       <td data-label="Aparelhos Reparados">${c.aparelhos_reparados}</td>
       <td data-label="Total Gasto" class="text-neon">${formatarMoeda(c.total_gasto)}</td>
       <td data-label="Cliente desde">${formatarData(c.criado_em)}</td>
@@ -938,9 +938,9 @@ function renderEquipe() {
 
     return `
       <tr>
-        <td data-label="Nome">${u.nome}</td>
-        <td data-label="E-mail">${u.email}</td>
-        <td data-label="Cargo">${u.cargo}</td>
+        <td data-label="Nome">${escaparHtml(u.nome)}</td>
+        <td data-label="E-mail">${escaparHtml(u.email)}</td>
+        <td data-label="Cargo">${escaparHtml(u.cargo)}</td>
         <td data-label="Permissões" style="max-width:320px;">${permissoesLabel}</td>
         <td data-label="Status">${badge}</td>
         <td class="cell-actions">
