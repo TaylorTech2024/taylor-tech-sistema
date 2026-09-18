@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const { precoFinal } = require('../data/margens');
+const { precoFinal, obterConfiguracoes } = require('../data/margens');
 
 const LABEL_CATEGORIA = {
   bateria: 'Troca de Bateria',
@@ -33,19 +33,22 @@ exports.listarServicos = async (req, res) => {
   }
 
   const [rows] = await pool.query(
-    `SELECT id, nome_peca, categoria, preco_custo, quantidade
+    `SELECT id, nome_peca, categoria, qualidade, preco_custo, quantidade
      FROM estoque
      WHERE ativo = 1 AND marca = ? AND modelo = ?
      ORDER BY categoria ASC`,
     [marca, modelo]
   );
 
+  const { margens } = await obterConfiguracoes();
+
   const servicos = rows.map((peca) => ({
     peca_id: peca.id,
     servico: LABEL_CATEGORIA[peca.categoria] || LABEL_CATEGORIA.outro,
     descricao: peca.nome_peca,
+    qualidade: peca.qualidade,
     categoria: peca.categoria,
-    valor: precoFinal(peca.preco_custo, peca.categoria),
+    valor: precoFinal(peca.preco_custo, peca.categoria, margens),
     disponivel: peca.quantidade > 0
   }));
 

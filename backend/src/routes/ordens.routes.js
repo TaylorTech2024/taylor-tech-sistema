@@ -7,5 +7,6 @@ router.get('/:id', ordensController.buscarPorId);
 router.post('/', ordensController.criarManual);
 router.put('/:id', ordensController.atualizarStatus);
 router.put('/:id/concluir', ordensController.concluir);
+router.put('/:id/cancelar', ordensController.cancelar);
 
 module.exports = router;

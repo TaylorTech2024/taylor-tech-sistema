@@ -148,51 +148,7 @@
   margin-bottom: 1.5rem;
 }
 
-.field {
-  margin-bottom: 1.1rem;
-}
-
-.field label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-}
-
-.field input,
-.field select {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: rgba(9, 11, 16, 0.55);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 0.92rem;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  appearance: none;
-}
-
-.field select {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%2339ff14' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  padding-right: 2.4rem;
-}
-
-.field input:focus,
-.field select:focus {
-  border-color: var(--neon);
-  box-shadow: 0 0 0 3px rgba(57, 255, 20, 0.12);
-}
-
-.field select:disabled,
-.field input:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+/* .field (input/select/label) styles moved to base.css - shared with admin.css */
 
 .price-box {
   margin: 1.3rem 0;

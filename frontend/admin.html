@@ -43,6 +43,7 @@
       <div class="nav-item" data-view="estoque" data-modulo="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</div>
       <div class="nav-item" data-view="clientes" data-modulo="clientes"><i class="fa-solid fa-users"></i> Clientes</div>
       <div class="nav-item" data-view="equipe" data-modulo="equipe"><i class="fa-solid fa-user-shield"></i> Equipe</div>
+      <div class="nav-item" data-view="configuracoes" data-modulo="configuracoes"><i class="fa-solid fa-gear"></i> Configurações</div>
     </nav>
 
     <div class="sidebar-footer">
@@ -188,7 +189,7 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Peça</th><th>Marca</th><th>Modelo</th><th>Categoria</th>
+              <th>Peça</th><th>Marca</th><th>Modelo</th><th>Categoria</th><th>Qualidade</th>
               <th>Custo</th><th>Preço Final</th><th>Qtd.</th><th>Status</th><th></th>
             </tr>
           </thead>
@@ -238,6 +239,40 @@
           <tbody id="equipeTbody"></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- ===================== CONFIGURACOES ===================== -->
+    <section class="view" id="view-configuracoes">
+      <div class="admin-header">
+        <div>
+          <h1>Configurações</h1>
+          <p>Mão de obra, garantia e regras de precificação — vale para o site e o painel inteiro.</p>
+        </div>
+      </div>
+
+      <form id="formConfiguracoes" class="card" style="padding:1.6rem; max-width:520px; display:grid; gap:1.1rem;">
+        <div class="field" style="margin-bottom:0;">
+          <label for="cfgMargemBateria">Mão de obra — Bateria (R$)</label>
+          <input type="number" step="0.01" id="cfgMargemBateria">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="cfgMargemTelaLcd">Mão de obra — Tela LCD (R$)</label>
+          <input type="number" step="0.01" id="cfgMargemTelaLcd">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="cfgMargemTelaOled">Mão de obra — Tela OLED (R$)</label>
+          <input type="number" step="0.01" id="cfgMargemTelaOled">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="cfgMargemOutro">Mão de obra — Outros reparos (R$)</label>
+          <input type="number" step="0.01" id="cfgMargemOutro">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label for="cfgGarantiaDias">Garantia padrão (dias)</label>
+          <input type="number" id="cfgGarantiaDias">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnSalvarConfig"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+      </form>
     </section>
 
   </main>

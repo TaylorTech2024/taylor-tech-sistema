@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS estoque (
   marca VARCHAR(40) NOT NULL,
   modelo VARCHAR(80) NOT NULL,
   categoria ENUM('bateria', 'tela_lcd', 'tela_oled', 'outro') NOT NULL,
+  qualidade VARCHAR(40) NULL,
   preco_custo DECIMAL(10,2) NOT NULL,
   quantidade INT NOT NULL DEFAULT 0,
   estoque_minimo INT NOT NULL DEFAULT 3,
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS ordens_servico (
   status ENUM('pendente', 'em_andamento', 'concluido', 'cancelado') NOT NULL DEFAULT 'pendente',
   origem ENUM('site', 'manual') NOT NULL DEFAULT 'site',
   observacoes TEXT NULL,
+  motivo_cancelamento VARCHAR(255) NULL,
   criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   concluido_em TIMESTAMP NULL,
   CONSTRAINT fk_os_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
@@ -142,3 +144,20 @@ CREATE TABLE IF NOT EXISTS contas_receber (
   CONSTRAINT fk_receber_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- Tabela: configuracoes
+-- Linha unica (id = 1) com as margens de mao de obra e a garantia
+-- padrao, editaveis pelo painel em vez de fixas no codigo.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS configuracoes (
+  id INT PRIMARY KEY DEFAULT 1,
+  margem_bateria DECIMAL(10,2) NOT NULL DEFAULT 120.00,
+  margem_tela_lcd DECIMAL(10,2) NOT NULL DEFAULT 150.00,
+  margem_tela_oled DECIMAL(10,2) NOT NULL DEFAULT 200.00,
+  margem_outro DECIMAL(10,2) NOT NULL DEFAULT 100.00,
+  garantia_dias INT NOT NULL DEFAULT 90,
+  atualizado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+INSERT INTO configuracoes (id) VALUES (1) ON DUPLICATE KEY UPDATE id = id;

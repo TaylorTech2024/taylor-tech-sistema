@@ -46,7 +46,8 @@ const api = {
     buscar: (id) => apiRequest(`/ordens/${id}`),
     criar: (dados) => apiRequest('/ordens', { method: 'POST', body: JSON.stringify(dados) }),
     atualizarStatus: (id, dados) => apiRequest(`/ordens/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
-    concluir: (id) => apiRequest(`/ordens/${id}/concluir`, { method: 'PUT' })
+    concluir: (id) => apiRequest(`/ordens/${id}/concluir`, { method: 'PUT' }),
+    cancelar: (id, motivo) => apiRequest(`/ordens/${id}/cancelar`, { method: 'PUT', body: JSON.stringify({ motivo }) })
   },
 
   checklist: {
@@ -92,6 +93,11 @@ const api = {
     criar: (dados) => apiRequest('/usuarios', { method: 'POST', body: JSON.stringify(dados) }),
     atualizar: (id, dados) => apiRequest(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
     remover: (id) => apiRequest(`/usuarios/${id}`, { method: 'DELETE' })
+  },
+
+  configuracoes: {
+    obter: () => apiRequest('/configuracoes'),
+    atualizar: (dados) => apiRequest('/configuracoes', { method: 'PUT', body: JSON.stringify(dados) })
   }
 };
 

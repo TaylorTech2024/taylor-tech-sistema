@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const { precoFinal } = require('../data/margens');
+const { precoFinal, obterConfiguracoes } = require('../data/margens');
 
 // Cria (ou reaproveita) o cliente pelo whatsapp e abre uma OS pendente
 // vinda da vitrine publica (index.html).
@@ -23,7 +23,8 @@ exports.criarPedido = async (req, res) => {
       return res.status(404).json({ erro: 'Servico/peca nao encontrado.' });
     }
     const peca = pecaRows[0];
-    const valorCobrado = precoFinal(peca.preco_custo, peca.categoria);
+    const { margens } = await obterConfiguracoes();
+    const valorCobrado = precoFinal(peca.preco_custo, peca.categoria, margens);
 
     const whatsappLimpo = String(whatsapp).replace(/\D/g, '');
 

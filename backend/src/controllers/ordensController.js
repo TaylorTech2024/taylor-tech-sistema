@@ -11,7 +11,7 @@ exports.listar = async (req, res) => {
 
   const [rows] = await pool.query(
     `SELECT os.id, os.aparelho_marca, os.aparelho_modelo, os.servico_descricao,
-            os.valor_cobrado, os.status, os.origem, os.observacoes,
+            os.valor_cobrado, os.status, os.origem, os.observacoes, os.motivo_cancelamento,
             os.criado_em, os.concluido_em,
             c.id AS cliente_id, c.nome AS cliente_nome, c.whatsapp AS cliente_whatsapp
      FROM ordens_servico os
@@ -93,6 +93,31 @@ exports.atualizarStatus = async (req, res) => {
 
   valores.push(id);
   await pool.query(`UPDATE ordens_servico SET ${campos.join(', ')} WHERE id = ?`, valores);
+  res.json({ ok: true });
+};
+
+// Cancela a OS, exigindo um motivo (fica registrado para consulta futura).
+exports.cancelar = async (req, res) => {
+  const { id } = req.params;
+  const { motivo } = req.body;
+
+  if (!motivo || !motivo.trim()) {
+    return res.status(400).json({ erro: 'Informe o motivo do cancelamento.' });
+  }
+
+  const [osRows] = await pool.query(`SELECT status FROM ordens_servico WHERE id = ?`, [id]);
+  if (osRows.length === 0) return res.status(404).json({ erro: 'OS nao encontrada.' });
+  if (osRows[0].status === 'concluido') {
+    return res.status(409).json({ erro: 'Esta OS ja foi concluida e nao pode ser cancelada.' });
+  }
+  if (osRows[0].status === 'cancelado') {
+    return res.status(409).json({ erro: 'Esta OS ja esta cancelada.' });
+  }
+
+  await pool.query(
+    `UPDATE ordens_servico SET status = 'cancelado', motivo_cancelamento = ? WHERE id = ?`,
+    [motivo.trim(), id]
+  );
   res.json({ ok: true });
 };
 

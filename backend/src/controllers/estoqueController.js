@@ -1,16 +1,18 @@
 const pool = require('../config/db');
-const { precoFinal } = require('../data/margens');
+const { precoFinal, obterConfiguracoes } = require('../data/margens');
 
 exports.listar = async (req, res) => {
   const [rows] = await pool.query(
-    `SELECT id, nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo, ativo
+    `SELECT id, nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo, ativo
      FROM estoque
      ORDER BY marca ASC, modelo ASC, categoria ASC`
   );
 
+  const { margens } = await obterConfiguracoes();
+
   const dados = rows.map((r) => ({
     ...r,
-    preco_final: precoFinal(r.preco_custo, r.categoria),
+    preco_final: precoFinal(r.preco_custo, r.categoria, margens),
     estoque_baixo: r.quantidade <= r.estoque_minimo
   }));
 
@@ -18,24 +20,24 @@ exports.listar = async (req, res) => {
 };
 
 exports.criar = async (req, res) => {
-  const { nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo } = req.body;
-  const categoriasValidas = ['bateria', 'tela_lcd', 'tela_oled', 'tampa_traseira', 'outro'];
+  const { nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo } = req.body;
+  const categoriasValidas = ['bateria', 'tela_lcd', 'tela_oled', 'outro'];
 
   if (!nome_peca || !marca || !modelo || !categoriasValidas.includes(categoria) || preco_custo == null) {
     return res.status(400).json({ erro: 'Dados invalidos para cadastro de peca.' });
   }
 
   const [result] = await pool.query(
-    `INSERT INTO estoque (nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [nome_peca, marca, modelo, categoria, preco_custo, quantidade || 0, estoque_minimo || 3]
+    `INSERT INTO estoque (nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nome_peca, marca, modelo, categoria, qualidade || null, preco_custo, quantidade || 0, estoque_minimo || 3]
   );
   res.status(201).json({ id: result.insertId });
 };
 
 exports.atualizar = async (req, res) => {
   const { id } = req.params;
-  const { nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo, ativo } = req.body;
+  const { nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo, ativo } = req.body;
 
   await pool.query(
     `UPDATE estoque SET
@@ -43,12 +45,13 @@ exports.atualizar = async (req, res) => {
       marca = COALESCE(?, marca),
       modelo = COALESCE(?, modelo),
       categoria = COALESCE(?, categoria),
+      qualidade = ?,
       preco_custo = COALESCE(?, preco_custo),
       quantidade = COALESCE(?, quantidade),
       estoque_minimo = COALESCE(?, estoque_minimo),
       ativo = COALESCE(?, ativo)
      WHERE id = ?`,
-    [nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo, ativo, id]
+    [nome_peca, marca, modelo, categoria, qualidade || null, preco_custo, quantidade, estoque_minimo, ativo, id]
   );
   res.json({ ok: true });
 };

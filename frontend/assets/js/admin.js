@@ -75,7 +75,8 @@ const CARREGADORES_VIEW = {
   financeiro: carregarFinanceiro,
   estoque: carregarEstoque,
   clientes: carregarClientes,
-  equipe: carregarEquipe
+  equipe: carregarEquipe,
+  configuracoes: carregarConfiguracoes
 };
 
 document.querySelectorAll('.nav-item').forEach((item) => {
@@ -130,19 +131,49 @@ function criarOsCard(os) {
     </div>
     <div class="os-meta">${os.servico_descricao}</div>
     <div class="os-valor">${formatarMoeda(os.valor_cobrado)}</div>
+    ${os.status === 'cancelado' && os.motivo_cancelamento
+      ? `<div class="os-meta" style="color:var(--danger); font-style:italic;">Motivo: ${os.motivo_cancelamento}</div>`
+      : ''}
     <div class="os-actions">
       <a class="btn btn-ghost btn-sm" href="${whatsLink}" target="_blank"><i class="fa-brands fa-whatsapp"></i> Chamar</a>
       ${os.status !== 'concluido' && os.status !== 'cancelado'
-        ? `<button class="btn btn-primary btn-sm" data-acao="concluir" data-id="${os.id}"><i class="fa-solid fa-check"></i> Concluir</button>`
+        ? `<button class="btn btn-primary btn-sm" data-acao="concluir" data-id="${os.id}"><i class="fa-solid fa-check"></i> Concluir</button>
+           <button class="btn btn-danger btn-sm" data-acao="cancelar" data-id="${os.id}"><i class="fa-solid fa-ban"></i> Cancelar</button>`
         : ''}
     </div>
   `;
 
   const btnConcluir = div.querySelector('[data-acao="concluir"]');
-  if (btnConcluir) {
-    btnConcluir.addEventListener('click', () => concluirOs(os.id));
-  }
+  if (btnConcluir) btnConcluir.addEventListener('click', () => concluirOs(os.id));
+
+  const btnCancelar = div.querySelector('[data-acao="cancelar"]');
+  if (btnCancelar) btnCancelar.addEventListener('click', () => cancelarOs(os.id));
+
   return div;
+}
+
+async function cancelarOs(id) {
+  const { value: motivo } = await Swal.fire({
+    icon: 'warning',
+    title: `Cancelar OS #${id}?`,
+    input: 'textarea',
+    inputLabel: 'Motivo do cancelamento (obrigatório)',
+    inputPlaceholder: 'Ex: cliente desistiu, aparelho sem conserto, peça indisponível...',
+    showCancelButton: true,
+    confirmButtonText: 'Cancelar OS',
+    cancelButtonText: 'Voltar',
+    customClass: swalClasses(),
+    inputValidator: (value) => (!value || !value.trim()) && 'Informe o motivo do cancelamento.'
+  });
+  if (!motivo) return;
+
+  try {
+    await api.ordens.cancelar(id, motivo);
+    Swal.fire({ icon: 'success', title: 'OS cancelada.', customClass: swalClasses(), timer: 1600, showConfirmButton: false });
+    carregarOrdens();
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
 }
 
 async function concluirOs(id) {
@@ -655,7 +686,7 @@ function renderEstoque(lista) {
     : '';
 
   if (lista.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Nenhuma peça cadastrada.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Nenhuma peça cadastrada.</td></tr>';
     return;
   }
 
@@ -674,6 +705,7 @@ function renderEstoque(lista) {
         <td>${p.marca}</td>
         <td>${p.modelo}</td>
         <td>${CATEGORIA_LABEL[p.categoria] || p.categoria}</td>
+        <td>${p.qualidade || '—'}</td>
         <td>${formatarMoeda(p.preco_custo)}</td>
         <td class="text-neon">${formatarMoeda(p.preco_final)}</td>
         <td>${p.quantidade}</td>
@@ -709,6 +741,7 @@ function formularioPecaHtml(peca = {}) {
       <select id="pecaCategoria" class="swal2-input" style="margin:0;width:100%;">
         ${categorias.map(([v, l]) => `<option value="${v}" ${peca.categoria === v ? 'selected' : ''}>${l}</option>`).join('')}
       </select>
+      <input id="pecaQualidade" class="swal2-input" style="margin:0;width:100%;" placeholder="Qualidade (ex: Original, AAA, Compatível)" value="${peca.qualidade || ''}">
       <input id="pecaCusto" type="number" step="0.01" class="swal2-input" style="margin:0;width:100%;" placeholder="Preço de custo (R$)" value="${peca.preco_custo || ''}">
       <input id="pecaQtd" type="number" class="swal2-input" style="margin:0;width:100%;" placeholder="Quantidade em estoque" value="${peca.quantidade ?? ''}">
       <input id="pecaMin" type="number" class="swal2-input" style="margin:0;width:100%;" placeholder="Estoque mínimo" value="${peca.estoque_minimo ?? 3}">
@@ -743,6 +776,7 @@ function lerFormularioPeca() {
   const marca = document.getElementById('pecaMarca').value.trim();
   const modelo = document.getElementById('pecaModelo').value.trim();
   const categoria = document.getElementById('pecaCategoria').value;
+  const qualidade = document.getElementById('pecaQualidade').value.trim();
   const preco_custo = Number(document.getElementById('pecaCusto').value);
   const quantidade = Number(document.getElementById('pecaQtd').value || 0);
   const estoque_minimo = Number(document.getElementById('pecaMin').value || 3);
@@ -751,7 +785,7 @@ function lerFormularioPeca() {
     Swal.showValidationMessage('Preencha nome, marca, modelo e preço de custo.');
     return false;
   }
-  return { nome_peca, marca, modelo, categoria, preco_custo, quantidade, estoque_minimo };
+  return { nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo };
 }
 
 async function abrirModalEditarPeca(id) {
@@ -846,7 +880,8 @@ const MODULOS_PERMISSAO = [
   { valor: 'financeiro', label: 'Financeiro' },
   { valor: 'estoque', label: 'Estoque' },
   { valor: 'clientes', label: 'Clientes' },
-  { valor: 'equipe', label: 'Equipe (gestão de acessos)' }
+  { valor: 'equipe', label: 'Equipe (gestão de acessos)' },
+  { valor: 'configuracoes', label: 'Configurações (mão de obra e garantia)' }
 ];
 
 let equipeCache = [];
@@ -1005,6 +1040,40 @@ async function removerPessoa(id) {
     Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
   }
 }
+
+/* =====================================================================
+   CONFIGURACOES
+===================================================================== */
+async function carregarConfiguracoes() {
+  try {
+    const config = await api.configuracoes.obter();
+    document.getElementById('cfgMargemBateria').value = config.margens.bateria;
+    document.getElementById('cfgMargemTelaLcd').value = config.margens.tela_lcd;
+    document.getElementById('cfgMargemTelaOled').value = config.margens.tela_oled;
+    document.getElementById('cfgMargemOutro').value = config.margens.outro;
+    document.getElementById('cfgGarantiaDias').value = config.garantia_dias;
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro ao carregar configurações', text: err.message, customClass: swalClasses() });
+  }
+}
+
+document.getElementById('formConfiguracoes').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const dados = {
+    margem_bateria: Number(document.getElementById('cfgMargemBateria').value),
+    margem_tela_lcd: Number(document.getElementById('cfgMargemTelaLcd').value),
+    margem_tela_oled: Number(document.getElementById('cfgMargemTelaOled').value),
+    margem_outro: Number(document.getElementById('cfgMargemOutro').value),
+    garantia_dias: Number(document.getElementById('cfgGarantiaDias').value)
+  };
+
+  try {
+    await api.configuracoes.atualizar(dados);
+    Swal.fire({ icon: 'success', title: 'Configurações salvas!', text: 'Os novos valores já valem para a vitrine e o painel.', customClass: swalClasses(), timer: 1800, showConfirmButton: false });
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Erro', text: err.message, customClass: swalClasses() });
+  }
+});
 
 /* =====================================================================
    INICIALIZACAO
