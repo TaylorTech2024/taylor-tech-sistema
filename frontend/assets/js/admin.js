@@ -670,10 +670,29 @@ async function carregarEstoque() {
 
   try {
     estoqueCache = await api.estoque.listar();
-    renderEstoque(estoqueCache);
+    popularFiltroMarcaEstoque();
+    aplicarFiltrosEstoque();
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Erro: ${err.message}</td></tr>`;
   }
+}
+
+function popularFiltroMarcaEstoque() {
+  const select = document.getElementById('filtroEstoqueMarca');
+  const atual = select.value;
+  const marcas = [...new Set(estoqueCache.map((p) => p.marca))].sort();
+  select.innerHTML = '<option value="">Todas as marcas</option>' +
+    marcas.map((m) => `<option value="${m}">${m}</option>`).join('');
+  if (marcas.includes(atual)) select.value = atual;
+}
+
+function aplicarFiltrosEstoque() {
+  const termo = document.getElementById('filtroEstoque').value.toLowerCase();
+  const marca = document.getElementById('filtroEstoqueMarca').value;
+  const filtrado = estoqueCache.filter((p) =>
+    `${p.nome_peca} ${p.marca} ${p.modelo}`.toLowerCase().includes(termo) &&
+    (!marca || p.marca === marca));
+  renderEstoque(filtrado);
 }
 
 function renderEstoque(lista) {
@@ -724,12 +743,8 @@ function renderEstoque(lista) {
     btn.addEventListener('click', () => removerPeca(Number(btn.dataset.id))));
 }
 
-document.getElementById('filtroEstoque').addEventListener('input', (e) => {
-  const termo = e.target.value.toLowerCase();
-  const filtrado = estoqueCache.filter((p) =>
-    `${p.nome_peca} ${p.marca} ${p.modelo}`.toLowerCase().includes(termo));
-  renderEstoque(filtrado);
-});
+document.getElementById('filtroEstoque').addEventListener('input', aplicarFiltrosEstoque);
+document.getElementById('filtroEstoqueMarca').addEventListener('change', aplicarFiltrosEstoque);
 
 function formularioPecaHtml(peca = {}) {
   const categorias = Object.entries(CATEGORIA_LABEL);
