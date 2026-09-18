@@ -1,11 +1,11 @@
-const CACHE_NAME = 'taylor-tech-cache-v1';
+const CACHE_NAME = 'taylor-tech-cache-v2';
 const ASSETS_TO_CACHE = [
   '/index.html',
   '/assets/css/base.css',
   '/assets/css/client.css',
   '/assets/js/api.js',
   '/assets/js/client.js',
-  '/assets/icons/icon.svg',
+  '/assets/icons/logo.png',
   '/manifest.json'
 ];
 
