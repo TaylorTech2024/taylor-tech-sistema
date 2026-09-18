@@ -1,4 +1,4 @@
-const CACHE_NAME = 'taylor-tech-cache-v3';
+const CACHE_NAME = 'taylor-tech-cache-v4';
 const ASSETS_TO_CACHE = [
   '/index.html',
   '/assets/css/base.css',
@@ -25,20 +25,22 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Network-first para chamadas de API, cache-first para estaticos.
+// Network-first pra tudo (API e estaticos): sempre busca a versao mais
+// nova quando tem internet, e cai pro cache soh se estiver offline. Assim
+// uma atualizacao de codigo chega pra quem ja instalou o app sem depender
+// de trocar o nome do cache a cada deploy.
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(request))
-    );
-    return;
-  }
-
   event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request))
+    fetch(request)
+      .then((response) => {
+        const copia = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copia));
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
 
