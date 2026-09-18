@@ -211,6 +211,22 @@ document.querySelectorAll('.magnetic').forEach((btn) => {
   });
 });
 
+document.querySelectorAll('.faq-item').forEach((item) => {
+  const pergunta = item.querySelector('.faq-question');
+  const resposta = item.querySelector('.faq-answer');
+  pergunta.addEventListener('click', () => {
+    const abrindo = !item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach((outro) => {
+      outro.classList.remove('open');
+      outro.querySelector('.faq-answer').style.maxHeight = null;
+    });
+    if (abrindo) {
+      item.classList.add('open');
+      resposta.style.maxHeight = `${resposta.scrollHeight}px`;
+    }
+  });
+});
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch((err) => console.error('SW falhou:', err));
