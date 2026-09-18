@@ -466,13 +466,13 @@ async function carregarFinanceiro() {
       ? '<tr><td colspan="7" class="empty-state">Nenhum lançamento ainda.</td></tr>'
       : lancamentos.map((l) => `
         <tr>
-          <td>${formatarData(l.criado_em)}</td>
-          <td>#${l.os_id}</td>
-          <td>${l.cliente_nome}</td>
-          <td>${l.aparelho_marca} ${l.aparelho_modelo} - ${l.descricao}</td>
-          <td>${formatarMoeda(l.valor_entrada)}</td>
-          <td>${formatarMoeda(l.custo_peca)}</td>
-          <td class="text-neon">${formatarMoeda(l.lucro)}</td>
+          <td data-label="Data">${formatarData(l.criado_em)}</td>
+          <td data-label="OS">#${l.os_id}</td>
+          <td data-label="Cliente">${l.cliente_nome}</td>
+          <td data-label="Descrição">${l.aparelho_marca} ${l.aparelho_modelo} - ${l.descricao}</td>
+          <td data-label="Valor Cobrado">${formatarMoeda(l.valor_entrada)}</td>
+          <td data-label="Custo Peça">${formatarMoeda(l.custo_peca)}</td>
+          <td data-label="Lucro" class="text-neon">${formatarMoeda(l.lucro)}</td>
         </tr>
       `).join('');
   } catch (err) {
@@ -494,10 +494,10 @@ async function carregarDespesas() {
       ? '<tr><td colspan="4" class="empty-state">Nenhuma despesa registrada.</td></tr>'
       : despesas.map((d) => `
         <tr>
-          <td>${new Date(d.data_despesa).toLocaleDateString('pt-BR')}</td>
-          <td>${d.descricao}</td>
-          <td class="text-danger" style="color:var(--danger);">${formatarMoeda(d.valor)}</td>
-          <td><button class="btn btn-danger btn-sm" data-acao="remover-despesa" data-id="${d.id}"><i class="fa-solid fa-trash"></i></button></td>
+          <td data-label="Data">${new Date(d.data_despesa).toLocaleDateString('pt-BR')}</td>
+          <td data-label="Descrição">${d.descricao}</td>
+          <td data-label="Valor" class="text-danger" style="color:var(--danger);">${formatarMoeda(d.valor)}</td>
+          <td class="cell-actions"><button class="btn btn-danger btn-sm" data-acao="remover-despesa" data-id="${d.id}"><i class="fa-solid fa-trash"></i></button></td>
         </tr>
       `).join('');
 
@@ -578,12 +578,12 @@ async function carregarContasReceber() {
           : '<span class="badge badge-warning">Pendente</span>';
         return `
           <tr>
-            <td>${c.cliente_nome}</td>
-            <td>${c.descricao}</td>
-            <td>${formatarMoeda(c.valor)}</td>
-            <td>${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}</td>
-            <td>${badge}</td>
-            <td>${c.status === 'pendente'
+            <td data-label="Cliente">${c.cliente_nome}</td>
+            <td data-label="Descrição">${c.descricao}</td>
+            <td data-label="Valor">${formatarMoeda(c.valor)}</td>
+            <td data-label="Vencimento">${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}</td>
+            <td data-label="Status">${badge}</td>
+            <td class="cell-actions">${c.status === 'pendente'
               ? `<button class="btn btn-primary btn-sm" data-acao="receber" data-id="${c.id}"><i class="fa-solid fa-check"></i> Recebido</button>`
               : ''}</td>
           </tr>
@@ -701,16 +701,16 @@ function renderEstoque(lista) {
 
     return `
       <tr>
-        <td>${p.nome_peca}</td>
-        <td>${p.marca}</td>
-        <td>${p.modelo}</td>
-        <td>${CATEGORIA_LABEL[p.categoria] || p.categoria}</td>
-        <td>${p.qualidade || '—'}</td>
-        <td>${formatarMoeda(p.preco_custo)}</td>
-        <td class="text-neon">${formatarMoeda(p.preco_final)}${p.preco_manual ? ' <span class="badge badge-warning" style="margin-left:0.3rem;">Manual</span>' : ''}</td>
-        <td>${p.quantidade}</td>
-        <td>${badge}</td>
-        <td>
+        <td data-label="Peça">${p.nome_peca}</td>
+        <td data-label="Marca">${p.marca}</td>
+        <td data-label="Modelo">${p.modelo}</td>
+        <td data-label="Categoria">${CATEGORIA_LABEL[p.categoria] || p.categoria}</td>
+        <td data-label="Qualidade">${p.qualidade || '—'}</td>
+        <td data-label="Custo">${formatarMoeda(p.preco_custo)}</td>
+        <td data-label="Preço Final" class="text-neon">${formatarMoeda(p.preco_final)}${p.preco_manual ? ' <span class="badge badge-warning" style="margin-left:0.3rem;">Manual</span>' : ''}</td>
+        <td data-label="Qtd.">${p.quantidade}</td>
+        <td data-label="Status">${badge}</td>
+        <td class="cell-actions">
           <button class="btn btn-ghost btn-sm" data-acao="editar" data-id="${p.id}"><i class="fa-solid fa-pen"></i></button>
           <button class="btn btn-danger btn-sm" data-acao="remover" data-id="${p.id}"><i class="fa-solid fa-trash"></i></button>
         </td>
@@ -861,11 +861,11 @@ function renderClientes(lista) {
   }
   tbody.innerHTML = lista.map((c) => `
     <tr>
-      <td>${c.nome}</td>
-      <td>${c.whatsapp}</td>
-      <td>${c.aparelhos_reparados}</td>
-      <td class="text-neon">${formatarMoeda(c.total_gasto)}</td>
-      <td>${formatarData(c.criado_em)}</td>
+      <td data-label="Cliente">${c.nome}</td>
+      <td data-label="WhatsApp">${c.whatsapp}</td>
+      <td data-label="Aparelhos Reparados">${c.aparelhos_reparados}</td>
+      <td data-label="Total Gasto" class="text-neon">${formatarMoeda(c.total_gasto)}</td>
+      <td data-label="Cliente desde">${formatarData(c.criado_em)}</td>
     </tr>
   `).join('');
 }
@@ -917,12 +917,12 @@ function renderEquipe() {
 
     return `
       <tr>
-        <td>${u.nome}</td>
-        <td>${u.email}</td>
-        <td>${u.cargo}</td>
-        <td style="max-width:320px;">${permissoesLabel}</td>
-        <td>${badge}</td>
-        <td>
+        <td data-label="Nome">${u.nome}</td>
+        <td data-label="E-mail">${u.email}</td>
+        <td data-label="Cargo">${u.cargo}</td>
+        <td data-label="Permissões" style="max-width:320px;">${permissoesLabel}</td>
+        <td data-label="Status">${badge}</td>
+        <td class="cell-actions">
           <button class="btn btn-ghost btn-sm" data-acao="editar-pessoa" data-id="${u.id}"><i class="fa-solid fa-pen"></i></button>
           <button class="btn btn-danger btn-sm" data-acao="remover-pessoa" data-id="${u.id}"><i class="fa-solid fa-trash"></i></button>
         </td>
