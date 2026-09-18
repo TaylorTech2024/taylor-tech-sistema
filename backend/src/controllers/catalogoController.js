@@ -33,7 +33,7 @@ exports.listarServicos = async (req, res) => {
   }
 
   const [rows] = await pool.query(
-    `SELECT id, nome_peca, categoria, qualidade, preco_custo, quantidade
+    `SELECT id, nome_peca, categoria, qualidade, preco_custo, preco_venda_manual, quantidade
      FROM estoque
      WHERE ativo = 1 AND marca = ? AND modelo = ?
      ORDER BY categoria ASC`,
@@ -48,7 +48,7 @@ exports.listarServicos = async (req, res) => {
     descricao: peca.nome_peca,
     qualidade: peca.qualidade,
     categoria: peca.categoria,
-    valor: precoFinal(peca.preco_custo, peca.categoria, margens),
+    valor: precoFinal(peca, margens),
     disponivel: peca.quantidade > 0
   }));
 

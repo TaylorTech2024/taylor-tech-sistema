@@ -15,7 +15,7 @@ exports.criarPedido = async (req, res) => {
     await conn.beginTransaction();
 
     const [pecaRows] = await conn.query(
-      `SELECT id, nome_peca, categoria, preco_custo FROM estoque WHERE id = ? AND ativo = 1`,
+      `SELECT id, nome_peca, categoria, preco_custo, preco_venda_manual FROM estoque WHERE id = ? AND ativo = 1`,
       [peca_id]
     );
     if (pecaRows.length === 0) {
@@ -24,7 +24,7 @@ exports.criarPedido = async (req, res) => {
     }
     const peca = pecaRows[0];
     const { margens } = await obterConfiguracoes();
-    const valorCobrado = precoFinal(peca.preco_custo, peca.categoria, margens);
+    const valorCobrado = precoFinal(peca, margens);
 
     const whatsappLimpo = String(whatsapp).replace(/\D/g, '');
 

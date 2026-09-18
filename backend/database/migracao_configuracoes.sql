@@ -24,3 +24,5 @@ INSERT INTO configuracoes (id) VALUES (1) ON DUPLICATE KEY UPDATE id = id;
 ALTER TABLE estoque ADD COLUMN IF NOT EXISTS qualidade VARCHAR(40) NULL;
 
 ALTER TABLE ordens_servico ADD COLUMN IF NOT EXISTS motivo_cancelamento VARCHAR(255) NULL;
+
+ALTER TABLE estoque ADD COLUMN IF NOT EXISTS preco_venda_manual DECIMAL(10,2) NULL;

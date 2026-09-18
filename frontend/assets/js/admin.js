@@ -707,7 +707,7 @@ function renderEstoque(lista) {
         <td>${CATEGORIA_LABEL[p.categoria] || p.categoria}</td>
         <td>${p.qualidade || '—'}</td>
         <td>${formatarMoeda(p.preco_custo)}</td>
-        <td class="text-neon">${formatarMoeda(p.preco_final)}</td>
+        <td class="text-neon">${formatarMoeda(p.preco_final)}${p.preco_manual ? ' <span class="badge badge-warning" style="margin-left:0.3rem;">Manual</span>' : ''}</td>
         <td>${p.quantidade}</td>
         <td>${badge}</td>
         <td>
@@ -743,6 +743,7 @@ function formularioPecaHtml(peca = {}) {
       </select>
       <input id="pecaQualidade" class="swal2-input" style="margin:0;width:100%;" placeholder="Qualidade (ex: Original, AAA, Compatível)" value="${peca.qualidade || ''}">
       <input id="pecaCusto" type="number" step="0.01" class="swal2-input" style="margin:0;width:100%;" placeholder="Preço de custo (R$)" value="${peca.preco_custo || ''}">
+      <input id="pecaPrecoManual" type="number" step="0.01" class="swal2-input" style="margin:0;width:100%;" placeholder="Preço final manual (R$) — deixe vazio p/ calcular automático" value="${peca.preco_venda_manual ?? ''}">
       <input id="pecaQtd" type="number" class="swal2-input" style="margin:0;width:100%;" placeholder="Quantidade em estoque" value="${peca.quantidade ?? ''}">
       <input id="pecaMin" type="number" class="swal2-input" style="margin:0;width:100%;" placeholder="Estoque mínimo" value="${peca.estoque_minimo ?? 3}">
     </div>
@@ -778,6 +779,8 @@ function lerFormularioPeca() {
   const categoria = document.getElementById('pecaCategoria').value;
   const qualidade = document.getElementById('pecaQualidade').value.trim();
   const preco_custo = Number(document.getElementById('pecaCusto').value);
+  const precoManualStr = document.getElementById('pecaPrecoManual').value;
+  const preco_venda_manual = precoManualStr === '' ? null : Number(precoManualStr);
   const quantidade = Number(document.getElementById('pecaQtd').value || 0);
   const estoque_minimo = Number(document.getElementById('pecaMin').value || 3);
 
@@ -785,7 +788,7 @@ function lerFormularioPeca() {
     Swal.showValidationMessage('Preencha nome, marca, modelo e preço de custo.');
     return false;
   }
-  return { nome_peca, marca, modelo, categoria, qualidade, preco_custo, quantidade, estoque_minimo };
+  return { nome_peca, marca, modelo, categoria, qualidade, preco_custo, preco_venda_manual, quantidade, estoque_minimo };
 }
 
 async function abrirModalEditarPeca(id) {
