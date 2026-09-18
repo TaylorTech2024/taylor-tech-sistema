@@ -7,6 +7,10 @@ exports.listar = async (req, res) => {
   if (status) {
     where = 'WHERE os.status = ?';
     params.push(status);
+  } else {
+    // Sem filtro explicito ("Todas"): esconde as canceladas, que ficam
+    // visiveis so quando o usuario escolhe o filtro "Canceladas".
+    where = "WHERE os.status != 'cancelado'";
   }
 
   const [rows] = await pool.query(
