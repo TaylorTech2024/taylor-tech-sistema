@@ -1,4 +1,4 @@
-const CACHE_NAME = 'taylor-tech-cache-v2';
+const CACHE_NAME = 'taylor-tech-cache-v3';
 const ASSETS_TO_CACHE = [
   '/index.html',
   '/assets/css/base.css',
