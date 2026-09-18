@@ -28,8 +28,8 @@
 }
 
 .sidebar .brand img {
-  width: 34px;
-  height: 34px;
+  width: 50px;
+  height: 50px;
   filter: drop-shadow(0 0 8px var(--neon-glow));
 }
 
@@ -323,7 +323,7 @@ table.data-table tbody tr:hover {
     display: flex; align-items: center; gap: 0.5rem;
     font-weight: 800; font-size: 1rem;
   }
-  .mobile-topbar .brand img { width: 28px; height: 28px; filter: drop-shadow(0 0 8px var(--neon-glow)); }
+  .mobile-topbar .brand img { width: 42px; height: 42px; filter: drop-shadow(0 0 8px var(--neon-glow)); }
   .mobile-topbar .brand span.tech { color: var(--neon); }
 
   .btn-hamburger {
